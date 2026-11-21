@@ -560,7 +560,7 @@
         // ===================================================================
         // CONFIGURAZIONE SUPABASE (Inserisci i tuoi dati per andare online)
         // ===================================================================
-        const SUPABASE_URL = 'https://zvulvawucmbycjoragvl.supabase.co/rest/v1/';      // es. 'https://xxxx.supabase.co'
+        const SUPABASE_URL = 'https://zvulvawucmbycjoragvl.supabase.co';      // es. 'https://xxxx.supabase.co'
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2dWx2YXd1Y21ieWNqb3JhZ3ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyNzAyNTAsImV4cCI6MjExMDg0NjI1MH0.PXVx1cSsMn3Ywpx8fjCpC6tD5uS7mhBOHJQ8oKqHEZQ'; // es. 'eyJhbGciOi...'
         const IS_CLOUD = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
         const sb = IS_CLOUD ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
