@@ -563,7 +563,14 @@
         const SUPABASE_URL = 'https://zvulvawucmbycjoragvl.supabase.co';      // es. 'https://xxxx.supabase.co'
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2dWx2YXd1Y21ieWNqb3JhZ3ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyNzAyNTAsImV4cCI6MjExMDg0NjI1MH0.PXVx1cSsMn3Ywpx8fjCpC6tD5uS7mhBOHJQ8oKqHEZQ'; // es. 'eyJhbGciOi...'
         const IS_CLOUD = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
-        const sb = IS_CLOUD ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        let sb = null;
+        try {
+            if (IS_CLOUD && window.supabase) {
+                sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error('Errore init Supabase:', e);
+        }
 
         const TIPS_SCHEMAS = {
             TIPS: [
@@ -583,7 +590,8 @@
         };
 
         // STATE
-        let currentUser = null; // { id, role, full_name, email, organization, city }
+        let currentUser = null;
+        let isLoadingSession = false;
         let regRole = 'player';
         let obsTargetMode = 'existing';
         let obsDraftScores = {};
@@ -591,7 +599,7 @@
         let adminTab = 'players';
         let adminEditContext = null;
 
-        // LOCAL DEMO DATA (Usato finché non inserisci le chiavi Supabase)
+        // LOCAL DEMO DATA
         let dbProfiles = [
             { id: 'u-player-1', role: 'player', full_name: 'Famiglia Giovannelli', email: 'giovannelli@demo.it', city: 'Carpaneto (PC)', organization: 'Academy Moretti' },
             { id: 'u-scout-1', role: 'scout', full_name: 'Marco Scout', email: 'scout@demo.it', city: 'Piacenza', organization: 'Osservatore UEFA D' },
@@ -644,30 +652,37 @@
             el.className = `${type === 'error' ? 'bg-crimson' : (type === 'success' ? 'bg-emerald-700' : 'bg-ink')} text-white px-4 py-3 rounded-md shadow-lg text-sm font-medium pointer-events-auto`;
             el.textContent = msg;
             document.getElementById('toast-container').appendChild(el);
-            setTimeout(() => el.remove(), 3200);
+            setTimeout(() => el.remove(), 3500);
         }
 
         // INIT & SUPABASE AUTH LISTENER
         window.onload = async function () {
-    document.getElementById('obs-date').value = todayISO();
-    if (IS_CLOUD) {
-        document.getElementById('demo-mode-box').classList.add('hidden');
-        const isRecovery = window.location.hash.includes('type=recovery') || window.location.hash.includes('type=magiclink');
+            const obsDate = document.getElementById('obs-date');
+            if (obsDate) obsDate.value = todayISO();
 
-        sb.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && isRecovery)) {
-                showSetPasswordPanel();
-            } else if (session?.user && !isRecovery) {
-                await loadCloudSession(session.user);
+            if (IS_CLOUD && !sb) {
+                showToast('Libreria Supabase non caricata. Ricarica la pagina o controlla la connessione.', 'error');
+                return;
             }
-        });
 
-        if (!isRecovery) {
-            const { data } = await sb.auth.getSession();
-            if (data.session?.user) await loadCloudSession(data.session.user);
-        }
-    }
-};
+            if (IS_CLOUD && sb) {
+                document.getElementById('demo-mode-box').classList.add('hidden');
+                const isRecovery = window.location.hash.includes('type=recovery') || window.location.hash.includes('type=magiclink');
+
+                sb.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && isRecovery)) {
+                        showSetPasswordPanel();
+                    } else if (event === 'SIGNED_IN' && session?.user && !currentUser) {
+                        await loadCloudSession(session.user);
+                    }
+                });
+
+                if (!isRecovery) {
+                    const { data } = await sb.auth.getSession();
+                    if (data?.session?.user && !currentUser) await loadCloudSession(data.session.user);
+                }
+            }
+        };
 
         // AUTH UI
         function setAuthTab(tab) {
@@ -692,14 +707,20 @@
             document.getElementById('reg-fullname-label').textContent = role === 'club' ? 'Nome Referente / DS *' : 'Nome e Cognome *';
         }
 
-        // AUTH ACTIONS (SUPABASE + DEMO)
+        // AUTH ACTIONS
         async function handleLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
-            if (!IS_CLOUD) return showToast('Inserisci SUPABASE_URL e KEY oppure usa i pulsanti Demo qui sotto.', 'info');
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
-            if (error) return showToast(error.message, 'error');
-            await loadCloudSession(data.user);
+            if (!email || !password) return showToast('Inserisci email e password.', 'error');
+            if (!sb) return showToast('Supabase non connesso.', 'error');
+            try {
+                showToast('Accesso in corso...', 'info');
+                const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                if (error) return showToast('Errore login: ' + error.message, 'error');
+                if (data?.user) await loadCloudSession(data.user);
+            } catch (err) {
+                showToast('Errore imprevisto: ' + err.message, 'error');
+            }
         }
 
         async function handleRegister() {
@@ -709,29 +730,28 @@
             if (regRole === 'player' && !document.getElementById('reg-p-privacy').checked) {
                 return showToast('È obbligatorio accettare il consenso privacy.', 'error');
             }
-            if (!IS_CLOUD) return showToast('Modalità Demo: usa i pulsanti rapidi in basso per testare i 4 ruoli.', 'info');
+            if (!sb) return showToast('Supabase non connesso.', 'error');
 
             const meta = {
                 role: regRole, full_name,
                 city: regRole === 'player' ? document.getElementById('reg-p-city').value : (regRole === 'scout' ? document.getElementById('reg-s-city').value : document.getElementById('reg-c-city').value),
                 organization: regRole === 'scout' ? document.getElementById('reg-s-org').value : (regRole === 'club' ? document.getElementById('reg-c-org').value : '')
             };
-            // Invia email di conferma (Magic Link) -> al click imposta la password
             const { error } = await sb.auth.signInWithOtp({
                 email,
                 options: { emailRedirectTo: window.location.origin + window.location.pathname, data: meta }
             });
             if (error) return showToast(error.message, 'error');
-            showToast('Email di conferma inviata! Clicca il link nella tua casella per impostare la password.', 'success');
+            showToast('Email di conferma inviata! Controlla la tua casella.', 'success');
         }
 
         async function handlePasswordReset() {
             const email = document.getElementById('reset-email').value.trim();
             if (!email) return showToast('Inserisci la tua email.', 'error');
-            if (!IS_CLOUD) return showToast('Funzione attiva in produzione con Supabase.', 'info');
+            if (!sb) return showToast('Supabase non connesso.', 'error');
             const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
             if (error) return showToast(error.message, 'error');
-            showToast('Email di ripristino inviata! Controlla la tua casella.', 'success');
+            showToast('Email di ripristino inviata!', 'success');
         }
 
         async function handleSaveNewPassword() {
@@ -739,24 +759,42 @@
             if (pwd.length < 6) return showToast('La password deve avere almeno 6 caratteri.', 'error');
             const { data, error } = await sb.auth.updateUser({ password: pwd });
             if (error) return showToast(error.message, 'error');
+            history.replaceState(null, '', window.location.pathname);
             showToast('Password salvata con successo!', 'success');
-            await loadCloudSession(data.user);
+            if (data?.user) await loadCloudSession(data.user);
         }
 
         async function loadCloudSession(user) {
-            let { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
-            if (!prof) {
-                const m = user.user_metadata || {};
-                prof = { id: user.id, role: m.role || 'player', email: user.email, full_name: m.full_name || user.email, city: m.city || '', organization: m.organization || '' };
-                await sb.from('profiles').upsert(prof);
+            if (isLoadingSession) return;
+            isLoadingSession = true;
+            try {
+                let { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+                if (!prof) {
+                    const m = user.user_metadata || {};
+                    prof = {
+                        id: user.id,
+                        role: m.role || 'scout',
+                        email: user.email,
+                        full_name: m.full_name || user.email,
+                        city: m.city || '',
+                        organization: m.organization || ''
+                    };
+                    const { error: upErr } = await sb.from('profiles').upsert(prof);
+                    if (upErr) showToast('Errore creazione profilo: ' + upErr.message, 'error');
+                }
+                currentUser = prof;
+                await syncAllFromCloud();
+                enterAppShell();
+            } catch (err) {
+                console.error(err);
+                showToast('Errore caricamento sessione: ' + err.message, 'error');
+            } finally {
+                isLoadingSession = false;
             }
-            currentUser = prof;
-            await syncAllFromCloud();
-            enterAppShell();
         }
 
         async function syncAllFromCloud() {
-            if (!IS_CLOUD) return;
+            if (!sb) return;
             const [pRes, oRes, rRes] = await Promise.all([
                 sb.from('players').select('*'),
                 sb.from('observations').select('*').order('obs_date', { ascending: false }),
@@ -782,7 +820,7 @@
             document.getElementById('hdr-user-name').textContent = `${currentUser.full_name} ${currentUser.organization ? '• ' + currentUser.organization : ''}`;
 
             const labels = { player: 'Calciatore / Famiglia', scout: 'Scout', club: 'Società', admin: 'Amministratore' };
-            document.getElementById('hdr-role-badge').textContent = labels[currentUser.role];
+            document.getElementById('hdr-role-badge').textContent = labels[currentUser.role] || currentUser.role;
 
             ['player', 'scout', 'club', 'admin'].forEach(r => {
                 document.getElementById(`role-view-${r}`).classList.toggle('hidden', r !== currentUser.role);
@@ -795,7 +833,7 @@
         }
 
         async function handleLogout() {
-            if (IS_CLOUD) await sb.auth.signOut();
+            if (sb) await sb.auth.signOut();
             currentUser = null;
             document.getElementById('app-shell').classList.add('hidden');
             document.getElementById('view-auth').classList.remove('hidden');
