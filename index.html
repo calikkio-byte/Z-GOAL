@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FFFFFF">
+    <title>Scouting Dept — Piattaforma Atleti, Scout, Società & Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        canvas: '#F5F5F7',
+                        ink: '#1D1D1F',
+                        muted: '#6E6E73',
+                        line: '#E5E5EA',
+                        accent: { DEFAULT: '#0071E3', hover: '#0077ED', soft: '#EBF5FF' },
+                        crimson: { DEFAULT: '#D70015', soft: '#FFF0F0' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body { background-color: #F5F5F7; color: #1D1D1F; font-size: 15px; line-height: 1.5; overflow-x: hidden; }
+        input[type="range"].scout-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: #D2D2D7; border-radius: 3px; outline: none; }
+        input[type="range"].scout-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 6px; background: #FFF; border: 2px solid #0071E3; box-shadow: 0 2px 5px rgba(0,0,0,0.14); cursor: pointer; }
+        input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid #0071E3; outline-offset: 1px; }
+        .pdf-sheet { width: 210mm; min-height: 297mm; background: #FFF; color: #1D1D1F; padding: 14mm 15mm; margin: 0 auto 20px auto; border: 1px solid #E5E5EA; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            .no-print { display: none !important; }
+            #print-area { display: block !important; width: 100% !important; }
+            .pdf-sheet { margin: 0 !important; border: none !important; }
+        }
+    </style>
+</head>
+<body class="pb-16">
+
+    <!-- TOAST -->
+    <div id="toast-container" class="no-print fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-md pointer-events-none"></div>
+
+    <!-- ===================================================================== -->
+    <!-- SCREEN 0: AUTENTICAZIONE (LOGIN, REGISTRAZIONE 3 RUOLI, RESET PWD)    -->
+    <!-- ===================================================================== -->
+    <section id="view-auth" class="no-print min-h-screen flex items-center justify-center p-4 sm:p-6">
+        <div class="w-full max-w-xl bg-white rounded-lg border border-line shadow-sm p-6 sm:p-8">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-line">
+                <div class="w-10 h-10 rounded-md bg-ink text-white flex items-center justify-center">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl text-ink tracking-tight">Scouting Dept</h1>
+                    <p class="text-xs text-muted">Piattaforma Calcio — Atleti, Scout & Società</p>
+                </div>
+            </div>
+
+            <!-- Tabs: Accedi / Registrati / Recupera -->
+            <div class="grid grid-cols-3 gap-1 bg-canvas p-1 rounded-md border border-line mb-6">
+                <button onclick="setAuthTab('login')" id="atab-login" class="py-2 rounded text-xs sm:text-sm font-semibold bg-white text-ink shadow-sm">Accedi</button>
+                <button onclick="setAuthTab('register')" id="atab-register" class="py-2 rounded text-xs sm:text-sm font-medium text-muted">Registrati</button>
+                <button onclick="setAuthTab('reset')" id="atab-reset" class="py-2 rounded text-xs sm:text-sm font-medium text-muted">Password</button>
+            </div>
+
+            <!-- TAB 1: LOGIN -->
+            <div id="auth-panel-login" class="space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-ink block mb-1">Email</label>
+                    <input type="email" id="login-email" placeholder="nome@esempio.it" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-ink block mb-1">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm">
+                </div>
+                <button onclick="handleLogin()" class="w-full min-h-[46px] rounded-md bg-accent hover:bg-accent-hover text-white font-semibold text-sm transition">
+                    Accedi alla Piattaforma
+                </button>
+                <div class="text-center">
+                    <button onclick="setAuthTab('reset')" class="text-xs text-accent hover:underline font-medium">Hai dimenticato la password? Ripristinala via email</button>
+                </div>
+            </div>
+
+            <!-- TAB 2: REGISTRAZIONE (3 RUOLI + EMAIL CONFERMA) -->
+            <div id="auth-panel-register" class="hidden space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-ink block mb-2">1. Seleziona la tipologia di account</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button type="button" onclick="selectRegRole('player')" data-rrole="player" class="rrole-btn p-3 rounded-md border-2 border-accent bg-accent-soft text-left">
+                            <div class="font-semibold text-xs text-ink">Calciatore / Famiglia</div>
+                            <div class="text-[11px] text-muted mt-0.5">Profilo atleta e privacy</div>
+                        </button>
+                        <button type="button" onclick="selectRegRole('scout')" data-rrole="scout" class="rrole-btn p-3 rounded-md border border-line bg-canvas/40 text-left">
+                            <div class="font-semibold text-xs text-ink">Account Scout</div>
+                            <div class="text-[11px] text-muted mt-0.5">Osservazioni e T.I.P.S.</div>
+                        </button>
+                        <button type="button" onclick="selectRegRole('club')" data-rrole="club" class="rrole-btn p-3 rounded-md border border-line bg-canvas/40 text-left">
+                            <div class="font-semibold text-xs text-ink">Account Società</div>
+                            <div class="text-[11px] text-muted mt-0.5">Vetrina e Vivaio</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Common Email -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-ink block mb-1">Email di registrazione *</label>
+                        <input type="email" id="reg-email" placeholder="email@esempio.it" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-ink block mb-1" id="reg-fullname-label">Nome e Cognome *</label>
+                        <input type="text" id="reg-fullname" placeholder="Mario Rossi" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                    </div>
+                </div>
+
+                <!-- Role-Specific Registration Fields -->
+                <div id="reg-fields-player" class="space-y-3 p-3.5 bg-canvas/50 rounded-md border border-line">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-semibold text-ink block mb-1">Data di Nascita Atleta *</label>
+                            <input type="date" id="reg-p-dob" value="2013-01-01" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-ink block mb-1">Città di Residenza *</label>
+                            <input type="text" id="reg-p-city" placeholder="Piacenza (PC)" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-semibold text-ink block mb-1">Ruolo</label>
+                            <select id="reg-p-role" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                                <option>Portiere</option><option>Difensore</option><option selected>Centrocampista</option><option>Attaccante</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-ink block mb-1">Genitore/Tutore (se minorenne)</label>
+                            <input type="text" id="reg-p-guardian" placeholder="Nome genitore" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                        </div>
+                    </div>
+                    <label class="flex items-start gap-2.5 cursor-pointer pt-1">
+                        <input type="checkbox" id="reg-p-privacy" class="mt-0.5 w-4 h-4 accent-accent">
+                        <span class="text-xs text-ink">Acconsento al trattamento dei dati sportivi (GDPR) per l'osservazione da parte di Scout e Società registrate.</span>
+                    </label>
+                </div>
+
+                <div id="reg-fields-scout" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-canvas/50 rounded-md border border-line">
+                    <div>
+                        <label class="text-xs font-semibold text-ink block mb-1">Qualifica / Licenza *</label>
+                        <input type="text" id="reg-s-org" placeholder="Es. Osservatore UEFA / Mister" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-ink block mb-1">Zona Operativa *</label>
+                        <input type="text" id="reg-s-city" placeholder="Es. Emilia-Romagna / Lombardia" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                    </div>
+                </div>
+
+                <div id="reg-fields-club" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-canvas/50 rounded-md border border-line">
+                    <div>
+                        <label class="text-xs font-semibold text-ink block mb-1">Nome Società *</label>
+                        <input type="text" id="reg-c-org" placeholder="Es. Piacenza Calcio" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-ink block mb-1">Città / Categoria *</label>
+                        <input type="text" id="reg-c-city" placeholder="Es. Piacenza — Serie D / Giovanili" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm">
+                    </div>
+                </div>
+
+                <div class="p-3 bg-accent-soft border border-blue-200 rounded-md text-xs text-ink">
+                    <i class="fa-solid fa-envelope-circle-check text-accent mr-1.5"></i>
+                    Riceverai un'email di conferma: cliccando il link imposterai subito la tua password personale.
+                </div>
+
+                <button onclick="handleRegister()" class="w-full min-h-[46px] rounded-md bg-ink hover:bg-ink/90 text-white font-semibold text-sm transition">
+                    Invia Email di Conferma e Registrati
+                </button>
+            </div>
+
+            <!-- TAB 3: RIPRISTINA PASSWORD -->
+            <div id="auth-panel-reset" class="hidden space-y-4">
+                <p class="text-xs text-muted">Inserisci l'email associata al tuo account. Ti invieremo un link sicuro per impostare una nuova password.</p>
+                <div>
+                    <label class="text-xs font-semibold text-ink block mb-1">Email</label>
+                    <input type="email" id="reset-email" placeholder="nome@esempio.it" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm">
+                </div>
+                <button onclick="handlePasswordReset()" class="w-full min-h-[46px] rounded-md bg-accent hover:bg-accent-hover text-white font-semibold text-sm transition">
+                    Invia Email di Ripristino Password
+                </button>
+            </div>
+
+            <!-- SET NEW PASSWORD PANEL (Triggered after clicking confirmation/reset email link) -->
+            <div id="auth-panel-setpwd" class="hidden space-y-4">
+                <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-md text-xs text-emerald-900 font-medium">
+                    Email confermata! Imposta ora la tua password di accesso.
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-ink block mb-1">Nuova Password (min. 6 caratteri)</label>
+                    <input type="password" id="new-password-input" placeholder="••••••••" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm">
+                </div>
+                <button onclick="handleSaveNewPassword()" class="w-full min-h-[46px] rounded-md bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm transition">
+                    Salva Password ed Entra
+                </button>
+            </div>
+
+            <!-- DEMO QUICK ACCESS (Visible when Supabase keys are not yet configured) -->
+            <div id="demo-mode-box" class="mt-6 pt-5 border-t border-line">
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-muted mb-2.5 text-center">Anteprima Rapida (Modalità Demo Locale — 4 Ruoli)</div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button onclick="enterDemoRole('player')" class="py-2 px-2 rounded-md bg-canvas hover:bg-line text-ink text-xs font-semibold border border-line">Calciatore</button>
+                    <button onclick="enterDemoRole('scout')" class="py-2 px-2 rounded-md bg-canvas hover:bg-line text-ink text-xs font-semibold border border-line">Scout</button>
+                    <button onclick="enterDemoRole('club')" class="py-2 px-2 rounded-md bg-canvas hover:bg-line text-ink text-xs font-semibold border border-line">Società</button>
+                    <button onclick="enterDemoRole('admin')" class="py-2 px-2 rounded-md bg-ink text-white text-xs font-semibold">Admin</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- APP SHELL (HEADER + ROLE VIEWS)                                       -->
+    <!-- ===================================================================== -->
+    <div id="app-shell" class="hidden">
+        <header class="no-print sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-line">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-md bg-ink text-white flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-shield-halved text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-base text-ink">Scouting Dept</span>
+                            <span id="hdr-role-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-accent-soft text-accent">Scout</span>
+                        </div>
+                        <p id="hdr-user-name" class="text-xs text-muted truncate max-w-[160px] sm:max-w-xs"></p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="min-h-[38px] px-3.5 rounded-md bg-canvas hover:bg-line border border-line text-ink text-xs font-semibold transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Esci
+                </button>
+            </div>
+        </header>
+
+        <!-- ================================================================= -->
+        <!-- 1. DASHBOARD CALCIATORE / FAMIGLIA                                -->
+        <!-- ================================================================= -->
+        <main id="role-view-player" class="no-print hidden max-w-3xl mx-auto px-4 sm:px-6 pt-7 space-y-6">
+            <div>
+                <h1 class="text-2xl font-bold text-ink">Il Tuo Profilo Calciatore</h1>
+                <p class="text-sm text-muted mt-1">Aggiorna i dati essenziali e controlla se gli osservatori hanno visionato il profilo.</p>
+            </div>
+
+            <!-- OBSERVATION STATUS BANNER (NO SCORES, ONLY PRESENCE/DATE) -->
+            <div class="bg-white rounded-lg p-5 border border-line">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-semibold text-sm text-ink flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-accent"></i> Attività di Osservazione
+                    </h2>
+                    <span id="player-obs-count-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded bg-accent-soft text-accent">0 osservazioni</span>
+                </div>
+                <div id="player-obs-pings" class="space-y-2 text-sm text-muted"></div>
+                <p class="text-[11px] text-muted mt-3 pt-3 border-t border-line">
+                    <i class="fa-solid fa-lock mr-1"></i> Per garantire l'oggettività della valutazione tecnica, i punteggi e le relazioni degli scout restano riservati alle società.
+                </p>
+            </div>
+
+            <!-- ESSENTIAL DATA & PRIVACY FORM -->
+            <div class="bg-white rounded-lg p-5 sm:p-6 border border-line space-y-4">
+                <h2 class="font-semibold text-base text-ink pb-3 border-b border-line">Dati Essenziali & Consenso Privacy</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div><label class="text-xs font-semibold block mb-1">Nome e Cognome *</label><input id="pp-name" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Data di Nascita *</label><input type="date" id="pp-dob" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Residenza *</label><input id="pp-residence" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Società Attuale</label><input id="pp-club" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Categoria</label><input id="pp-league" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Reparto</label>
+                        <select id="pp-role-cat" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                            <option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option>
+                        </select>
+                    </div>
+                    <div><label class="text-xs font-semibold block mb-1">Piede</label>
+                        <select id="pp-foot" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                            <option>Destro</option><option>Sinistro</option><option>Ambidestro</option>
+                        </select>
+                    </div>
+                    <div><label class="text-xs font-semibold block mb-1">Altezza (cm)</label><input type="number" id="pp-height" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Peso (kg)</label><input type="number" id="pp-weight" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                </div>
+                <div class="p-4 rounded-md bg-emerald-50/70 border border-emerald-200 space-y-3">
+                    <input id="pp-guardian" placeholder="Nome Genitore / Tutore (obbligatorio se minorenne)" class="w-full min-h-[42px] px-3 bg-white border border-emerald-300 rounded-md text-sm">
+                    <label class="flex items-start gap-2.5 cursor-pointer">
+                        <input type="checkbox" id="pp-consent" class="mt-1 w-4 h-4 accent-emerald-700">
+                        <span class="text-xs text-emerald-950"><strong>Consenso Privacy Attivo:</strong> autorizzo Scout e Società registrate a visionare questa scheda.</span>
+                    </label>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="savePlayerSelfProfile()" class="min-h-[44px] px-6 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold">Salva Modifiche</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================================================================= -->
+        <!-- 2. DASHBOARD SCOUT                                                -->
+        <!-- ================================================================= -->
+        <main id="role-view-scout" class="no-print hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-5">
+            <!-- Scout Navigation Tabs -->
+            <div class="grid grid-cols-3 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
+                <button onclick="setScoutTab('observed')" id="stab-observed" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">I Miei Osservati</button>
+                <button onclick="setScoutTab('requests')" id="stab-requests" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Richieste Società</button>
+                <button onclick="setScoutTab('observe')" id="stab-observe" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted"><i class="fa-solid fa-plus mr-1"></i>Osserva Nuovo</button>
+            </div>
+
+            <!-- SCOUT TAB 1: MY OBSERVED PLAYERS -->
+            <div id="scout-panel-observed" class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h2 class="text-xl font-bold text-ink">Giocatori che hai osservato</h2>
+                    <input type="text" id="scout-search" oninput="renderScoutObserved()" placeholder="Cerca tra i tuoi osservati..." class="min-h-[40px] px-3.5 bg-white border border-line rounded-md text-sm sm:w-64">
+                </div>
+                <div id="scout-observed-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- SCOUT TAB 2: CLUB REQUESTS (GENERAL + VIVAIO) -->
+            <div id="scout-panel-requests" class="hidden space-y-4">
+                <div>
+                    <h2 class="text-xl font-bold text-ink">Richieste dalle Società</h2>
+                    <p class="text-sm text-muted">Richieste di mercato e incarichi sui Talenti del Vivaio da visionare.</p>
+                </div>
+                <div id="scout-requests-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- SCOUT TAB 3: OBSERVE NEW / EXISTING PLAYER (INTUITIVE T.I.P.S.) -->
+            <div id="scout-panel-observe" class="hidden max-w-3xl mx-auto bg-white rounded-lg p-5 sm:p-6 border border-line space-y-5">
+                <div class="pb-3 border-b border-line">
+                    <h2 class="text-lg font-bold text-ink">Osserva un Giocatore (Valutazione T.I.P.S.)</h2>
+                    <p class="text-xs text-muted mt-0.5">Seleziona un calciatore già registrato oppure inseriscine uno nuovo con dichiarazione privacy.</p>
+                </div>
+
+                <!-- Mode: Existing vs New -->
+                <div class="grid grid-cols-2 gap-2 bg-canvas p-1 rounded-md border border-line">
+                    <button type="button" onclick="setObsTargetMode('existing')" id="obs-mode-existing" class="py-2 rounded text-xs font-semibold bg-white text-ink shadow-sm">Calciatore Registrato</button>
+                    <button type="button" onclick="setObsTargetMode('new')" id="obs-mode-new" class="py-2 rounded text-xs font-medium text-muted">Crea Nuova Scheda</button>
+                </div>
+
+                <!-- Pick Existing -->
+                <div id="obs-target-existing">
+                    <label class="text-xs font-semibold block mb-1">Seleziona Calciatore *</label>
+                    <select id="obs-player-select" class="w-full min-h-[44px] px-3 bg-canvas/40 border border-line rounded-md text-sm font-medium"></select>
+                </div>
+
+                <!-- Create New with Privacy Check -->
+                <div id="obs-target-new" class="hidden space-y-3 p-4 bg-canvas/50 rounded-md border border-line">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div><label class="text-xs font-semibold block mb-1">Nome e Cognome *</label><input id="obs-new-name" class="w-full min-h-[40px] px-3 bg-white border border-line rounded-md text-sm"></div>
+                        <div><label class="text-xs font-semibold block mb-1">Data di Nascita *</label><input type="date" id="obs-new-dob" value="2013-01-01" class="w-full min-h-[40px] px-3 bg-white border border-line rounded-md text-sm"></div>
+                        <div><label class="text-xs font-semibold block mb-1">Reparto</label>
+                            <select id="obs-new-role" class="w-full min-h-[40px] px-3 bg-white border border-line rounded-md text-sm">
+                                <option>Portiere</option><option>Difensore</option><option selected>Centrocampista</option><option>Attaccante</option>
+                            </select>
+                        </div>
+                        <div><label class="text-xs font-semibold block mb-1">Club</label><input id="obs-new-club" class="w-full min-h-[40px] px-3 bg-white border border-line rounded-md text-sm"></div>
+                        <div><label class="text-xs font-semibold block mb-1">Residenza</label><input id="obs-new-res" class="w-full min-h-[40px] px-3 bg-white border border-line rounded-md text-sm"></div>
+                        <div><label class="text-xs font-semibold block mb-1">Piede</label>
+                            <select id="obs-new-foot" class="w-full min-h-[40px] px-3 bg-white border border-line rounded-md text-sm"><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select>
+                        </div>
+                    </div>
+                    <label class="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-md cursor-pointer">
+                        <input type="checkbox" id="obs-new-privacy" class="mt-0.5 w-4 h-4 accent-accent">
+                        <span class="text-xs text-ink"><strong>Dichiarazione Privacy Obbligatoria:</strong> Dichiaro di aver ottenuto il consenso dal calciatore o dalla famiglia.</span>
+                    </label>
+                </div>
+
+                <!-- Match Context -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div><label class="text-xs font-semibold block mb-1">Data</label><input type="date" id="obs-date" class="w-full min-h-[40px] px-2.5 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Luogo</label><input id="obs-location" placeholder="Es. Piacenza" class="w-full min-h-[40px] px-2.5 bg-canvas/40 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Contesto</label>
+                        <select id="obs-context" class="w-full min-h-[40px] px-2.5 bg-canvas/40 border border-line rounded-md text-sm"><option>Campionato</option><option>Amichevole</option><option>Allenamento</option><option>Torneo</option></select>
+                    </div>
+                    <div><label class="text-xs font-semibold block mb-1">Schema Voti</label>
+                        <select id="obs-variant" onchange="renderScoutTipsSliders()" class="w-full min-h-[40px] px-2.5 bg-canvas/40 border border-line rounded-md text-sm font-semibold">
+                            <option value="TIPS">T.I.P.S. Base</option>
+                            <option value="PARMA">Parma (Sc/Sl/S)</option>
+                            <option value="TIPSA">T.I.P.S.A.</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- T.I.P.S. Sliders -->
+                <div id="obs-sliders-box" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+                <!-- Final Score Preview + Notes + Outcome -->
+                <div class="p-4 bg-canvas rounded-md border border-line flex items-center justify-between">
+                    <span class="text-sm font-semibold text-ink">Punteggio Finale Calcolato (Media T.I.P.S.)</span>
+                    <span id="obs-live-avg" class="text-2xl font-bold text-accent">7.0</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold block mb-1">Esito Valutazione</label>
+                        <select id="obs-outcome" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm font-semibold">
+                            <option>Da prendere</option>
+                            <option selected>Da rivedere e monitorare</option>
+                            <option>Non idoneo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold block mb-1">Atteggiamento</label>
+                        <select id="obs-attitude" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                            <option>Ottimo / Leader</option><option selected>Positivo</option><option>Discreto</option><option>Da migliorare</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold block mb-1">Relazione Tecnica (Vedere • Capire • Scegliere • Eseguire)</label>
+                    <textarea id="obs-notes" rows="3" placeholder="Qualità del gesto tecnico, scelta tattica, tempi di gioco..." class="w-full p-3 bg-canvas/40 border border-line rounded-md text-sm"></textarea>
+                </div>
+
+                <button onclick="submitScoutObservation()" class="w-full min-h-[46px] rounded-md bg-accent hover:bg-accent-hover text-white font-semibold text-sm transition">
+                    Salva Valutazione e Firma Scheda
+                </button>
+            </div>
+        </main>
+
+        <!-- ================================================================= -->
+        <!-- 3. DASHBOARD SOCIETÀ (VETRINA + TALENTI DEL VIVAIO PRIVATI)       -->
+        <!-- ================================================================= -->
+        <main id="role-view-club" class="no-print hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-5">
+            <div class="grid grid-cols-3 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
+                <button onclick="setClubTab('showcase')" id="ctab-showcase" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">Vetrina Calciatori</button>
+                <button onclick="setClubTab('vivaio')" id="ctab-vivaio" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Talenti del Vivaio</button>
+                <button onclick="setClubTab('requests')" id="ctab-requests" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Richieste Scout</button>
+            </div>
+
+            <!-- CLUB TAB 1: VETRINA PUBBLICA -->
+            <div id="club-panel-showcase" class="space-y-4">
+                <div class="bg-white rounded-lg p-4 border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                    <input type="text" id="club-f-search" oninput="renderClubShowcase()" placeholder="Cerca nome o club..." class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
+                    <select id="club-f-role" onchange="renderClubShowcase()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
+                        <option value="ALL">Ruolo: Tutti</option><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option>
+                    </select>
+                    <select id="club-f-foot" onchange="renderClubShowcase()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
+                        <option value="ALL">Piede: Tutti</option><option>Destro</option><option>Sinistro</option><option>Ambidestro</option>
+                    </select>
+                    <select id="club-f-year" onchange="renderClubShowcase()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
+                        <option value="ALL">Annata: Tutte</option>
+                    </select>
+                    <select id="club-f-tips" onchange="renderClubShowcase()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
+                        <option value="0">Media T.I.P.S.: Tutte</option><option value="7">≥ 7.0</option><option value="7.5">≥ 7.5</option><option value="8">≥ 8.0</option>
+                    </select>
+                </div>
+                <div id="club-showcase-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- CLUB TAB 2: TALENTI DEL VIVAIO (SEZIONE PRIVATA DELLA SOCIETÀ) -->
+            <div id="club-panel-vivaio" class="hidden space-y-5">
+                <div class="bg-white rounded-lg p-5 border border-line space-y-4">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase text-amber-700">Sezione Privata Società</span>
+                        <h2 class="text-lg font-bold text-ink">Inserisci un Talento del Tuo Vivaio</h2>
+                        <p class="text-xs text-muted">Visibile solo alla tua società e agli scout a cui invii richiesta di valutazione.</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <input id="viv-name" placeholder="Nome e Cognome *" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                        <input type="date" id="viv-dob" value="2013-01-01" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                        <select id="viv-role" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"><option>Portiere</option><option>Difensore</option><option selected>Centrocampista</option><option>Attaccante</option></select>
+                        <input id="viv-league" placeholder="Squadra (es. U14)" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                        <button onclick="addVivaioPlayer()" class="min-h-[42px] rounded-md bg-ink hover:bg-ink/90 text-white text-sm font-semibold">+ Aggiungi al Vivaio</button>
+                    </div>
+                </div>
+                <div id="club-vivaio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- CLUB TAB 3: INVIARE RICHIESTA GENERALE AGLI SCOUT -->
+            <div id="club-panel-requests" class="hidden space-y-5">
+                <div class="bg-white rounded-lg p-5 border border-line space-y-4">
+                    <h2 class="text-lg font-bold text-ink">Nuova Richiesta di Ricerca per gli Scout</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input id="creq-title" placeholder="Es. Cerchiamo Esterno Sinistro" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                        <input id="creq-years" placeholder="Annate (es. 2011 - 2012)" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
+                        <select id="creq-role" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option></select>
+                    </div>
+                    <textarea id="creq-notes" rows="2" placeholder="Caratteristiche richieste, zona geografica, urgenza..." class="w-full p-3 bg-canvas/40 border border-line rounded-md text-sm"></textarea>
+                    <button onclick="createGeneralClubRequest()" class="min-h-[42px] px-5 rounded-md bg-accent hover:bg-accent-hover text-white text-sm font-semibold">Pubblica Richiesta agli Scout</button>
+                </div>
+                <div id="club-my-requests" class="space-y-3"></div>
+            </div>
+        </main>
+
+        <!-- ================================================================= -->
+        <!-- 4. DASHBOARD AMMINISTRATORE (VISTA GLOBALE + MODIFICA DATI)       -->
+        <!-- ================================================================= -->
+        <main id="role-view-admin" class="no-print hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-5">
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-white rounded-lg p-4 border border-line"><div class="text-xs text-muted">Calciatori Totali</div><div id="adm-kpi-players" class="text-2xl font-bold text-ink mt-1">0</div></div>
+                <div class="bg-white rounded-lg p-4 border border-line"><div class="text-xs text-muted">Scout Iscritti</div><div id="adm-kpi-scouts" class="text-2xl font-bold text-ink mt-1">0</div></div>
+                <div class="bg-white rounded-lg p-4 border border-line"><div class="text-xs text-muted">Società Iscritte</div><div id="adm-kpi-clubs" class="text-2xl font-bold text-ink mt-1">0</div></div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
+                <button onclick="setAdminTab('players')" id="admtab-players" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">Tutti i Calciatori</button>
+                <button onclick="setAdminTab('scouts')" id="admtab-scouts" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Tutti gli Scout</button>
+                <button onclick="setAdminTab('clubs')" id="admtab-clubs" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Tutte le Società</button>
+            </div>
+
+            <div id="admin-content-container" class="bg-white rounded-lg border border-line overflow-x-auto"></div>
+        </main>
+
+        <!-- MODAL DETTAGLIO GIOCATORE & PDF (PER SCOUT, CLUB, ADMIN) -->
+        <div id="detail-modal" class="no-print hidden fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-line space-y-5">
+                <div class="flex items-start justify-between pb-3 border-b border-line">
+                    <div>
+                        <h3 id="dm-name" class="text-xl font-bold text-ink"></h3>
+                        <p id="dm-meta" class="text-xs text-muted mt-0.5"></p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportDetailPDF()" class="min-h-[36px] px-3 rounded-md bg-accent text-white text-xs font-semibold"><i class="fa-solid fa-file-pdf mr-1"></i>PDF</button>
+                        <button onclick="closeDetailModal()" class="w-9 h-9 rounded-md hover:bg-canvas text-muted"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div id="dm-stats-bar" class="p-4 bg-canvas rounded-md border border-line flex flex-wrap items-center justify-between gap-3"></div>
+                <div id="dm-reviews-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- MODAL ADMIN EDIT -->
+        <div id="admin-edit-modal" class="no-print hidden fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl border border-line space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-line">
+                    <h3 class="font-bold text-base text-ink">Modifica Record (Admin)</h3>
+                    <button onclick="closeAdminEditModal()" class="text-muted"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="admin-edit-fields" class="space-y-3"></div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="closeAdminEditModal()" class="min-h-[40px] px-4 rounded-md bg-canvas text-sm font-medium">Annulla</button>
+                    <button onclick="saveAdminEdit()" class="min-h-[40px] px-5 rounded-md bg-accent text-white text-sm font-semibold">Salva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-area" class="hidden"></div>
+
+    <script>
+        // ===================================================================
+        // CONFIGURAZIONE SUPABASE (Inserisci i tuoi dati per andare online)
+        // ===================================================================
+        const SUPABASE_URL = 'https://zvulvawucmbycjoragvl.supabase.co/rest/v1/';      // es. 'https://xxxx.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2dWx2YXd1Y21ieWNqb3JhZ3ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyNzAyNTAsImV4cCI6MjExMDg0NjI1MH0.PXVx1cSsMn3Ywpx8fjCpC6tD5uS7mhBOHJQ8oKqHEZQ'; // es. 'eyJhbGciOi...'
+        const IS_CLOUD = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+        const sb = IS_CLOUD ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        const TIPS_SCHEMAS = {
+            TIPS: [
+                { key: 'T', label: 'T — Tecnica' }, { key: 'I', label: 'I — Intuito' },
+                { key: 'P', label: 'P — Personalità' }, { key: 'S', label: 'S — Speed' }
+            ],
+            PARMA: [
+                { key: 'T', label: 'T — Tecnica' }, { key: 'I', label: 'I — Intuito' },
+                { key: 'P', label: 'P — Personalità' }, { key: 'Sc', label: 'Sc — Speed Corto' },
+                { key: 'Sl', label: 'Sl — Speed Lungo' }, { key: 'Str', label: 'S — Struttura' }
+            ],
+            TIPSA: [
+                { key: 'T', label: 'T — Tecnica' }, { key: 'I', label: 'I — Intuito' },
+                { key: 'P', label: 'P — Personalità' }, { key: 'S', label: 'S — Speed' },
+                { key: 'Pow', label: 'P — Power' }, { key: 'A', label: 'A — Apprendimento' }
+            ]
+        };
+
+        // STATE
+        let currentUser = null; // { id, role, full_name, email, organization, city }
+        let regRole = 'player';
+        let obsTargetMode = 'existing';
+        let obsDraftScores = {};
+        let currentDetailPlayerId = null;
+        let adminTab = 'players';
+        let adminEditContext = null;
+
+        // LOCAL DEMO DATA (Usato finché non inserisci le chiavi Supabase)
+        let dbProfiles = [
+            { id: 'u-player-1', role: 'player', full_name: 'Famiglia Giovannelli', email: 'giovannelli@demo.it', city: 'Carpaneto (PC)', organization: 'Academy Moretti' },
+            { id: 'u-scout-1', role: 'scout', full_name: 'Marco Scout', email: 'scout@demo.it', city: 'Piacenza', organization: 'Osservatore UEFA D' },
+            { id: 'u-club-1', role: 'club', full_name: 'DS Piacenza Calcio', email: 'ds@piacenza.it', city: 'Piacenza', organization: 'Piacenza Calcio', category: 'Serie D / Giovanili' },
+            { id: 'u-admin-1', role: 'admin', full_name: 'Marco (Admin)', email: 'admin@2m-srls.com', city: 'Piacenza', organization: 'Amministratore' }
+        ];
+        let dbPlayers = [
+            {
+                id: 'p-1', owner_user_id: 'u-player-1', club_owner_id: null, is_vivaio: false,
+                name: 'Mattia Giovannelli', dob: '2014-01-09', residence: 'Carpaneto (PC)', club: 'Academy Moretti',
+                league: 'Pulcini U10', role_category: 'Centrocampista', role: 'Centrocampista', foot: 'Destro',
+                height: '142', weight: '34', is_minor: true, guardian_name: 'Famiglia Giovannelli',
+                privacy_consent: true, consent_type: 'parent'
+            },
+            {
+                id: 'p-viv-1', owner_user_id: null, club_owner_id: 'u-club-1', is_vivaio: true,
+                name: 'Lorenzo Ferrari', dob: '2012-05-14', residence: 'Piacenza (PC)', club: 'Piacenza Calcio',
+                league: 'Giovanissimi U14', role_category: 'Attaccante', role: 'Attaccante', foot: 'Sinistro',
+                height: '164', weight: '52', is_minor: true, guardian_name: '',
+                privacy_consent: true, consent_type: 'club_vivaio'
+            }
+        ];
+        let dbObservations = [
+            {
+                id: 'obs-1', player_id: 'p-1', observer_id: 'u-scout-1', observer_name: 'Marco Scout', observer_role: 'Osservatore UEFA D',
+                obs_date: '2026-11-10', location: 'Carpaneto', context: 'Campionato', attitude: 'Ottimo / Leader',
+                tips_variant: 'PARMA', scores: { T: 7.5, I: 8.0, P: 8.0, Sc: 8.0, Sl: 7.0, Str: 6.5 }, avg: 7.5,
+                outcome: 'Da prendere', notes: 'Ottima visione periferica e rapidità nello stretto.'
+            }
+        ];
+        let dbRequests = [
+            {
+                id: 'req-1', club_id: 'u-club-1', club_name: 'Piacenza Calcio', request_type: 'vivaio', player_id: 'p-viv-1',
+                title: 'Valutazione Vivaio: Lorenzo Ferrari (2012)', role_needed: 'Attaccante', birth_year_range: '2012',
+                notes: 'Richiediamo valutazione T.I.P.S. per valutare passaggio sotto età in U15.', status: 'open'
+            },
+            {
+                id: 'req-2', club_id: 'u-club-1', club_name: 'Piacenza Calcio', request_type: 'general', player_id: null,
+                title: 'Ricerca Terzino Sinistro 2011/2012', role_needed: 'Difensore', birth_year_range: '2011 - 2012',
+                notes: 'Preferibilmente mancino naturale, zona Emilia/Lombardia.', status: 'open'
+            }
+        ];
+
+        // HELPERS
+        function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function todayISO() { return new Date().toISOString().slice(0, 10); }
+        function formatDateIT(d) { if (!d) return '-'; const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d; }
+        function showToast(msg, type = 'info') {
+            const el = document.createElement('div');
+            el.className = `${type === 'error' ? 'bg-crimson' : (type === 'success' ? 'bg-emerald-700' : 'bg-ink')} text-white px-4 py-3 rounded-md shadow-lg text-sm font-medium pointer-events-auto`;
+            el.textContent = msg;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => el.remove(), 3200);
+        }
+
+        // INIT & SUPABASE AUTH LISTENER
+        window.onload = async function () {
+            document.getElementById('obs-date').value = todayISO();
+            if (IS_CLOUD) {
+                document.getElementById('demo-mode-box').classList.add('hidden');
+                sb.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && window.location.hash.includes('type=magiclink'))) {
+                        showSetPasswordPanel();
+                    } else if (session?.user) {
+                        await loadCloudSession(session.user);
+                    }
+                });
+                const { data } = await sb.auth.getSession();
+                if (data.session?.user) await loadCloudSession(data.session.user);
+            }
+        };
+
+        // AUTH UI
+        function setAuthTab(tab) {
+            ['login', 'register', 'reset', 'setpwd'].forEach(p => document.getElementById(`auth-panel-${p}`).classList.toggle('hidden', p !== tab));
+            ['login', 'register', 'reset'].forEach(t => {
+                const btn = document.getElementById(`atab-${t}`);
+                btn.className = t === tab ? 'py-2 rounded text-xs sm:text-sm font-semibold bg-white text-ink shadow-sm' : 'py-2 rounded text-xs sm:text-sm font-medium text-muted';
+            });
+        }
+        function showSetPasswordPanel() {
+            document.getElementById('view-auth').classList.remove('hidden');
+            document.getElementById('app-shell').classList.add('hidden');
+            setAuthTab('setpwd');
+        }
+        function selectRegRole(role) {
+            regRole = role;
+            document.querySelectorAll('.rrole-btn').forEach(b => {
+                const act = b.getAttribute('data-rrole') === role;
+                b.className = act ? 'rrole-btn p-3 rounded-md border-2 border-accent bg-accent-soft text-left' : 'rrole-btn p-3 rounded-md border border-line bg-canvas/40 text-left';
+            });
+            ['player', 'scout', 'club'].forEach(r => document.getElementById(`reg-fields-${r}`).classList.toggle('hidden', r !== role));
+            document.getElementById('reg-fullname-label').textContent = role === 'club' ? 'Nome Referente / DS *' : 'Nome e Cognome *';
+        }
+
+        // AUTH ACTIONS (SUPABASE + DEMO)
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!IS_CLOUD) return showToast('Inserisci SUPABASE_URL e KEY oppure usa i pulsanti Demo qui sotto.', 'info');
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) return showToast(error.message, 'error');
+            await loadCloudSession(data.user);
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('reg-email').value.trim();
+            const full_name = document.getElementById('reg-fullname').value.trim();
+            if (!email || !full_name) return showToast('Inserisci email e nome.', 'error');
+            if (regRole === 'player' && !document.getElementById('reg-p-privacy').checked) {
+                return showToast('È obbligatorio accettare il consenso privacy.', 'error');
+            }
+            if (!IS_CLOUD) return showToast('Modalità Demo: usa i pulsanti rapidi in basso per testare i 4 ruoli.', 'info');
+
+            const meta = {
+                role: regRole, full_name,
+                city: regRole === 'player' ? document.getElementById('reg-p-city').value : (regRole === 'scout' ? document.getElementById('reg-s-city').value : document.getElementById('reg-c-city').value),
+                organization: regRole === 'scout' ? document.getElementById('reg-s-org').value : (regRole === 'club' ? document.getElementById('reg-c-org').value : '')
+            };
+            // Invia email di conferma (Magic Link) -> al click imposta la password
+            const { error } = await sb.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: window.location.origin + window.location.pathname, data: meta }
+            });
+            if (error) return showToast(error.message, 'error');
+            showToast('Email di conferma inviata! Clicca il link nella tua casella per impostare la password.', 'success');
+        }
+
+        async function handlePasswordReset() {
+            const email = document.getElementById('reset-email').value.trim();
+            if (!email) return showToast('Inserisci la tua email.', 'error');
+            if (!IS_CLOUD) return showToast('Funzione attiva in produzione con Supabase.', 'info');
+            const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+            if (error) return showToast(error.message, 'error');
+            showToast('Email di ripristino inviata! Controlla la tua casella.', 'success');
+        }
+
+        async function handleSaveNewPassword() {
+            const pwd = document.getElementById('new-password-input').value;
+            if (pwd.length < 6) return showToast('La password deve avere almeno 6 caratteri.', 'error');
+            const { data, error } = await sb.auth.updateUser({ password: pwd });
+            if (error) return showToast(error.message, 'error');
+            showToast('Password salvata con successo!', 'success');
+            await loadCloudSession(data.user);
+        }
+
+        async function loadCloudSession(user) {
+            let { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+            if (!prof) {
+                const m = user.user_metadata || {};
+                prof = { id: user.id, role: m.role || 'player', email: user.email, full_name: m.full_name || user.email, city: m.city || '', organization: m.organization || '' };
+                await sb.from('profiles').upsert(prof);
+            }
+            currentUser = prof;
+            await syncAllFromCloud();
+            enterAppShell();
+        }
+
+        async function syncAllFromCloud() {
+            if (!IS_CLOUD) return;
+            const [pRes, oRes, rRes] = await Promise.all([
+                sb.from('players').select('*'),
+                sb.from('observations').select('*').order('obs_date', { ascending: false }),
+                sb.from('scout_requests').select('*').order('created_at', { ascending: false })
+            ]);
+            if (pRes.data) dbPlayers = pRes.data;
+            if (oRes.data) dbObservations = oRes.data;
+            if (rRes.data) dbRequests = rRes.data;
+            if (currentUser.role === 'admin') {
+                const profRes = await sb.from('profiles').select('*');
+                if (profRes.data) dbProfiles = profRes.data;
+            }
+        }
+
+        function enterDemoRole(role) {
+            currentUser = dbProfiles.find(p => p.role === role);
+            enterAppShell();
+        }
+
+        function enterAppShell() {
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('app-shell').classList.remove('hidden');
+            document.getElementById('hdr-user-name').textContent = `${currentUser.full_name} ${currentUser.organization ? '• ' + currentUser.organization : ''}`;
+
+            const labels = { player: 'Calciatore / Famiglia', scout: 'Scout', club: 'Società', admin: 'Amministratore' };
+            document.getElementById('hdr-role-badge').textContent = labels[currentUser.role];
+
+            ['player', 'scout', 'club', 'admin'].forEach(r => {
+                document.getElementById(`role-view-${r}`).classList.toggle('hidden', r !== currentUser.role);
+            });
+
+            if (currentUser.role === 'player') loadPlayerDashboard();
+            else if (currentUser.role === 'scout') loadScoutDashboard();
+            else if (currentUser.role === 'club') loadClubDashboard();
+            else if (currentUser.role === 'admin') loadAdminDashboard();
+        }
+
+        async function handleLogout() {
+            if (IS_CLOUD) await sb.auth.signOut();
+            currentUser = null;
+            document.getElementById('app-shell').classList.add('hidden');
+            document.getElementById('view-auth').classList.remove('hidden');
+            setAuthTab('login');
+        }
+
+        // ===================================================================
+        // 1. LOGICA CALCIATORE / FAMIGLIA (SOLO NOTIFICA OSSERVAZIONI, NO VOTI)
+        // ===================================================================
+        async function loadPlayerDashboard() {
+            let p = dbPlayers.find(x => x.owner_user_id === currentUser.id);
+            if (p) {
+                document.getElementById('pp-name').value = p.name || '';
+                document.getElementById('pp-dob').value = p.dob || '';
+                document.getElementById('pp-residence').value = p.residence || '';
+                document.getElementById('pp-club').value = p.club || '';
+                document.getElementById('pp-league').value = p.league || '';
+                document.getElementById('pp-role-cat').value = p.role_category || 'Centrocampista';
+                document.getElementById('pp-foot').value = p.foot || 'Destro';
+                document.getElementById('pp-height').value = p.height || '';
+                document.getElementById('pp-weight').value = p.weight || '';
+                document.getElementById('pp-guardian').value = p.guardian_name || '';
+                document.getElementById('pp-consent').checked = !!p.privacy_consent;
+            }
+
+            // Mostra SOLO data e contesto delle osservazioni (ZERO punteggi)
+            let pings = [];
+            if (p) {
+                if (IS_CLOUD) {
+                    const { data } = await sb.rpc('get_my_player_observation_pings', { p_player_id: p.id });
+                    pings = data || [];
+                } else {
+                    pings = dbObservations.filter(o => o.player_id === p.id).map(o => ({ obs_date: o.obs_date, context: o.context, location: o.location }));
+                }
+            }
+            document.getElementById('player-obs-count-badge').textContent = `${pings.length} ${pings.length === 1 ? 'osservazione' : 'osservazioni'}`;
+            document.getElementById('player-obs-pings').innerHTML = pings.length === 0
+                ? '<p class="text-xs text-muted">Nessuno scout ha ancora registrato un\'osservazione sul tuo profilo.</p>'
+                : pings.map(x => `<div class="p-3 rounded-md bg-canvas border border-line flex items-center justify-between text-xs"><span class="font-semibold text-ink"><i class="fa-solid fa-check-circle text-emerald-600 mr-1.5"></i>Osservato in ${esc(x.context || 'Gara')} (${esc(x.location || '-')})</span><span class="text-muted">${formatDateIT(x.obs_date)}</span></div>`).join('');
+        }
+
+        async function savePlayerSelfProfile() {
+            const name = document.getElementById('pp-name').value.trim();
+            if (!name) return showToast('Inserisci il nome del calciatore.', 'error');
+            const existing = dbPlayers.find(x => x.owner_user_id === currentUser.id);
+            const record = {
+                id: existing ? existing.id : 'p-' + Date.now(),
+                owner_user_id: currentUser.id, club_owner_id: null, is_vivaio: false,
+                name, dob: document.getElementById('pp-dob').value || null,
+                residence: document.getElementById('pp-residence').value.trim(),
+                club: document.getElementById('pp-club').value.trim(),
+                league: document.getElementById('pp-league').value.trim(),
+                role_category: document.getElementById('pp-role-cat').value,
+                role: document.getElementById('pp-role-cat').value,
+                foot: document.getElementById('pp-foot').value,
+                height: document.getElementById('pp-height').value,
+                weight: document.getElementById('pp-weight').value,
+                guardian_name: document.getElementById('pp-guardian').value.trim(),
+                privacy_consent: document.getElementById('pp-consent').checked,
+                consent_type: 'parent'
+            };
+            if (IS_CLOUD) {
+                const { error } = await sb.from('players').upsert(record);
+                if (error) return showToast(error.message, 'error');
+            } else {
+                const i = dbPlayers.findIndex(x => x.id === record.id);
+                if (i >= 0) dbPlayers[i] = record; else dbPlayers.unshift(record);
+            }
+            showToast('Profilo salvato con successo!', 'success');
+            loadPlayerDashboard();
+        }
+
+        // ===================================================================
+        // 2. LOGICA SCOUT (OSSERVATI, RICHIESTE SOCIETÀ, OSSERVA NUOVO)
+        // ===================================================================
+        function loadScoutDashboard() {
+            setScoutTab('observed');
+            renderScoutObserved();
+            renderScoutRequests();
+            populateObsPlayerSelect();
+            renderScoutTipsSliders();
+        }
+
+        function setScoutTab(tab) {
+            ['observed', 'requests', 'observe'].forEach(t => {
+                document.getElementById(`scout-panel-${t}`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`stab-${t}`).className = t === tab
+                    ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white'
+                    : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted';
+            });
+            if (tab === 'observe') populateObsPlayerSelect();
+        }
+
+        function getPlayerStats(pid) {
+            const list = dbObservations.filter(o => o.player_id === pid);
+            if (!list.length) return { count: 0, avg: null, list };
+            const avg = +(list.reduce((s, o) => s + Number(o.avg), 0) / list.length).toFixed(1);
+            return { count: list.length, avg, list };
+        }
+
+        function renderScoutObserved() {
+            const q = (document.getElementById('scout-search').value || '').toLowerCase();
+            const myIds = new Set(dbObservations.filter(o => o.observer_id === currentUser.id).map(o => o.player_id));
+            const list = dbPlayers.filter(p => myIds.has(p.id) && (!q || p.name.toLowerCase().includes(q)));
+            const grid = document.getElementById('scout-observed-grid');
+            if (!list.length) return grid.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Non hai ancora osservato nessun giocatore. Vai su <strong>Osserva Nuovo</strong>.</div>';
+            grid.innerHTML = list.map(p => renderPlayerCard(p)).join('');
+        }
+
+        function renderScoutRequests() {
+            const box = document.getElementById('scout-requests-list');
+            if (!dbRequests.length) return box.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessuna richiesta attiva dalle società.</div>';
+            box.innerHTML = dbRequests.map(r => `
+                <div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded ${r.request_type === 'vivaio' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-accent-soft text-accent'}">
+                                ${r.request_type === 'vivaio' ? 'Talento del Vivaio' : 'Richiesta Esigenza Club'}
+                            </span>
+                            <span class="text-xs text-muted">${esc(r.club_name)}</span>
+                        </div>
+                        <h3 class="font-semibold text-base text-ink">${esc(r.title)}</h3>
+                        <p class="text-xs text-muted mt-1">Ruolo: <strong>${esc(r.role_needed || '-')}</strong> • Annate: <strong>${esc(r.birth_year_range || '-')}</strong></p>
+                        <p class="text-xs text-ink bg-canvas p-3 rounded-md border border-line mt-2.5">${esc(r.notes || '-')}</p>
+                    </div>
+                    ${r.player_id ? `<button onclick="jumpToObservePlayer('${r.player_id}')" class="w-full min-h-[40px] rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Valuta questo Talento T.I.P.S.</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function jumpToObservePlayer(pid) {
+            setScoutTab('observe');
+            setObsTargetMode('existing');
+            document.getElementById('obs-player-select').value = pid;
+        }
+
+        function setObsTargetMode(mode) {
+            obsTargetMode = mode;
+            document.getElementById('obs-target-existing').classList.toggle('hidden', mode !== 'existing');
+            document.getElementById('obs-target-new').classList.toggle('hidden', mode !== 'new');
+            document.getElementById('obs-mode-existing').className = mode === 'existing' ? 'py-2 rounded text-xs font-semibold bg-white text-ink shadow-sm' : 'py-2 rounded text-xs font-medium text-muted';
+            document.getElementById('obs-mode-new').className = mode === 'new' ? 'py-2 rounded text-xs font-semibold bg-white text-ink shadow-sm' : 'py-2 rounded text-xs font-medium text-muted';
+        }
+
+        function populateObsPlayerSelect() {
+            const sel = document.getElementById('obs-player-select');
+            const available = dbPlayers.filter(p => p.privacy_consent || p.is_vivaio);
+            sel.innerHTML = available.map(p => `<option value="${p.id}">${esc(p.name)} (${p.dob ? p.dob.slice(0,4) : '-'}) — ${esc(p.club || '-')} ${p.is_vivaio ? '[VIVAIO]' : ''}</option>`).join('');
+        }
+
+        function renderScoutTipsSliders() {
+            const v = document.getElementById('obs-variant').value;
+            const schema = TIPS_SCHEMAS[v];
+            obsDraftScores = {};
+            document.getElementById('obs-sliders-box').innerHTML = schema.map(s => {
+                obsDraftScores[s.key] = 7.0;
+                return `<div class="p-3.5 bg-canvas/50 rounded-md border border-line">
+                    <div class="flex justify-between mb-1.5 text-xs font-semibold"><span>${s.label}</span><span id="osv-${s.key}" class="text-accent font-bold">7.0</span></div>
+                    <input type="range" min="1" max="10" step="0.5" value="7" oninput="updateObsSlider('${s.key}', this.value)" class="scout-slider">
+                </div>`;
+            }).join('');
+            updateObsLiveAvg();
+        }
+
+        function updateObsSlider(k, val) {
+            obsDraftScores[k] = parseFloat(val);
+            document.getElementById(`osv-${k}`).textContent = parseFloat(val).toFixed(1);
+            updateObsLiveAvg();
+        }
+
+        function updateObsLiveAvg() {
+            const vals = Object.values(obsDraftScores);
+            const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '7.0';
+            document.getElementById('obs-live-avg').textContent = avg;
+        }
+
+        async function submitScoutObservation() {
+            let pid = document.getElementById('obs-player-select').value;
+            if (obsTargetMode === 'new') {
+                const name = document.getElementById('obs-new-name').value.trim();
+                if (!name) return showToast('Inserisci il nome del giocatore.', 'error');
+                if (!document.getElementById('obs-new-privacy').checked) return showToast('Devi confermare la dichiarazione privacy.', 'error');
+                const newP = {
+                    id: 'p-' + Date.now(), owner_user_id: null, club_owner_id: null, is_vivaio: false,
+                    name, dob: document.getElementById('obs-new-dob').value || null,
+                    residence: document.getElementById('obs-new-res').value.trim(),
+                    club: document.getElementById('obs-new-club').value.trim(), league: '',
+                    role_category: document.getElementById('obs-new-role').value, role: document.getElementById('obs-new-role').value,
+                    foot: document.getElementById('obs-new-foot').value, privacy_consent: true,
+                    consent_type: 'scout_declared', consent_declared_by: currentUser.full_name
+                };
+                if (IS_CLOUD) {
+                    const { error } = await sb.from('players').insert(newP);
+                    if (error) return showToast(error.message, 'error');
+                }
+                dbPlayers.unshift(newP);
+                pid = newP.id;
+            }
+            if (!pid) return showToast('Seleziona un calciatore.', 'error');
+
+            const vals = Object.values(obsDraftScores);
+            const avg = +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
+            const obs = {
+                id: 'obs-' + Date.now(), player_id: pid, observer_id: currentUser.id,
+                observer_name: currentUser.full_name, observer_role: currentUser.organization || 'Scout',
+                obs_date: document.getElementById('obs-date').value || todayISO(),
+                location: document.getElementById('obs-location').value.trim() || '-',
+                context: document.getElementById('obs-context').value,
+                attitude: document.getElementById('obs-attitude').value,
+                tips_variant: document.getElementById('obs-variant').value,
+                scores: { ...obsDraftScores }, avg,
+                outcome: document.getElementById('obs-outcome').value,
+                notes: document.getElementById('obs-notes').value.trim() || 'Osservazione registrata.'
+            };
+            if (IS_CLOUD) {
+                const { error } = await sb.from('observations').insert(obs);
+                if (error) return showToast(error.message, 'error');
+            }
+            dbObservations.unshift(obs);
+            document.getElementById('obs-notes').value = '';
+            showToast(`Valutazione salvata (Media ${avg})!`, 'success');
+            setScoutTab('observed');
+            renderScoutObserved();
+        }
+
+        // ===================================================================
+        // 3. LOGICA SOCIETÀ (VETRINA + TALENTI VIVAIO PRIVATI + RICHIESTE)
+        // ===================================================================
+        function loadClubDashboard() {
+            const years = [...new Set(dbPlayers.map(p => p.dob ? p.dob.slice(0,4) : null).filter(Boolean))].sort((a,b) => b - a);
+            document.getElementById('club-f-year').innerHTML = '<option value="ALL">Annata: Tutte</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+            setClubTab('showcase');
+            renderClubShowcase();
+            renderClubVivaio();
+            renderClubMyRequests();
+        }
+
+        function setClubTab(tab) {
+            ['showcase', 'vivaio', 'requests'].forEach(t => {
+                document.getElementById(`club-panel-${t}`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`ctab-${t}`).className = t === tab
+                    ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white'
+                    : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted';
+            });
+        }
+
+        function renderClubShowcase() {
+            const q = (document.getElementById('club-f-search').value || '').toLowerCase();
+            const role = document.getElementById('club-f-role').value;
+            const foot = document.getElementById('club-f-foot').value;
+            const yr = document.getElementById('club-f-year').value;
+            const minT = parseFloat(document.getElementById('club-f-tips').value || 0);
+
+            const list = dbPlayers.filter(p => {
+                if (p.is_vivaio || !p.privacy_consent) return false;
+                const st = getPlayerStats(p.id);
+                if (st.count === 0) return false; // Vetrina: calciatori visionati dagli scout
+                if (q && !p.name.toLowerCase().includes(q) && !(p.club || '').toLowerCase().includes(q)) return false;
+                if (role !== 'ALL' && p.role_category !== role) return false;
+                if (foot !== 'ALL' && p.foot !== foot) return false;
+                if (yr !== 'ALL' && !(p.dob || '').startsWith(yr)) return false;
+                if (minT > 0 && (st.avg === null || st.avg < minT)) return false;
+                return true;
+            });
+            document.getElementById('club-showcase-grid').innerHTML = list.length
+                ? list.map(p => renderPlayerCard(p)).join('')
+                : '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessun calciatore trovato in vetrina per questi filtri.</div>';
+        }
+
+        async function addVivaioPlayer() {
+            const name = document.getElementById('viv-name').value.trim();
+            if (!name) return showToast('Inserisci nome e cognome.', 'error');
+            const newP = {
+                id: 'p-viv-' + Date.now(), owner_user_id: null, club_owner_id: currentUser.id, is_vivaio: true,
+                name, dob: document.getElementById('viv-dob').value || null, residence: currentUser.city || '',
+                club: currentUser.organization || currentUser.full_name, league: document.getElementById('viv-league').value.trim(),
+                role_category: document.getElementById('viv-role').value, role: document.getElementById('viv-role').value,
+                foot: 'Destro', privacy_consent: true, consent_type: 'club_vivaio'
+            };
+            if (IS_CLOUD) {
+                const { error } = await sb.from('players').insert(newP);
+                if (error) return showToast(error.message, 'error');
+            }
+            dbPlayers.unshift(newP);
+            document.getElementById('viv-name').value = '';
+            renderClubVivaio();
+            showToast('Talento aggiunto al tuo Vivaio privato!', 'success');
+        }
+
+        function renderClubVivaio() {
+            const mine = dbPlayers.filter(p => p.is_vivaio && p.club_owner_id === currentUser.id);
+            const grid = document.getElementById('club-vivaio-grid');
+            if (!mine.length) return grid.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessun talento inserito nel tuo Vivaio.</div>';
+            grid.innerHTML = mine.map(p => {
+                const st = getPlayerStats(p.id);
+                const alreadyReq = dbRequests.some(r => r.player_id === p.id);
+                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3">
+                    <div>
+                        <span class="text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">Vivaio Privato</span>
+                        <h3 class="font-semibold text-base text-ink mt-2">${esc(p.name)}</h3>
+                        <p class="text-xs text-muted">${esc(p.role_category)} • ${p.dob ? p.dob.slice(0,4) : '-'} • ${esc(p.league || '-')}</p>
+                        <div class="mt-3 p-2.5 bg-canvas rounded-md border border-line text-xs flex justify-between">
+                            <span>Media T.I.P.S.: <strong>${st.avg !== null ? st.avg.toFixed(1) : 'In attesa'}</strong></span>
+                            <span class="text-muted">${st.count} oss.</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openDetailModal('${p.id}')" class="flex-1 min-h-[38px] rounded-md bg-canvas border border-line text-xs font-semibold">Vedi Voti</button>
+                        <button onclick="requestScoutForVivaio('${p.id}')" class="flex-1 min-h-[38px] rounded-md ${alreadyReq ? 'bg-emerald-700' : 'bg-accent'} text-white text-xs font-semibold">
+                            ${alreadyReq ? 'Richiesta Inviata' : 'Chiedi a Scout'}
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function requestScoutForVivaio(pid) {
+            const p = dbPlayers.find(x => x.id === pid); if (!p) return;
+            const req = {
+                id: 'req-' + Date.now(), club_id: currentUser.id, club_name: currentUser.organization || currentUser.full_name,
+                request_type: 'vivaio', player_id: p.id, title: `Valutazione Vivaio: ${p.name} (${p.dob ? p.dob.slice(0,4) : '-'})`,
+                role_needed: p.role_category, birth_year_range: p.dob ? p.dob.slice(0,4) : '-',
+                notes: 'Richiesta valutazione tecnica T.I.P.S. per talento interno del vivaio.', status: 'open'
+            };
+            if (IS_CLOUD) {
+                const { error } = await sb.from('scout_requests').insert(req);
+                if (error) return showToast(error.message, 'error');
+            }
+            dbRequests.unshift(req);
+            renderClubVivaio();
+            renderClubMyRequests();
+            showToast('Richiesta inviata agli Scout!', 'success');
+        }
+
+        async function createGeneralClubRequest() {
+            const title = document.getElementById('creq-title').value.trim();
+            if (!title) return showToast('Inserisci un titolo per la richiesta.', 'error');
+            const req = {
+                id: 'req-' + Date.now(), club_id: currentUser.id, club_name: currentUser.organization || currentUser.full_name,
+                request_type: 'general', player_id: null, title,
+                role_needed: document.getElementById('creq-role').value,
+                birth_year_range: document.getElementById('creq-years').value.trim() || '-',
+                notes: document.getElementById('creq-notes').value.trim() || '-', status: 'open'
+            };
+            if (IS_CLOUD) {
+                const { error } = await sb.from('scout_requests').insert(req);
+                if (error) return showToast(error.message, 'error');
+            }
+            dbRequests.unshift(req);
+            document.getElementById('creq-title').value = '';
+            document.getElementById('creq-notes').value = '';
+            renderClubMyRequests();
+            showToast('Richiesta pubblicata agli Scout!', 'success');
+        }
+
+        function renderClubMyRequests() {
+            const mine = dbRequests.filter(r => r.club_id === currentUser.id);
+            document.getElementById('club-my-requests').innerHTML = mine.map(r => `
+                <div class="bg-white p-4 rounded-lg border border-line flex items-center justify-between gap-3">
+                    <div>
+                        <div class="font-semibold text-sm text-ink">${esc(r.title)}</div>
+                        <div class="text-xs text-muted">${esc(r.role_needed)} • ${esc(r.birth_year_range)} — ${esc(r.notes)}</div>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded bg-emerald-50 text-emerald-800">${r.request_type === 'vivaio' ? 'Vivaio' : 'Mercato'}</span>
+                </div>
+            `).join('');
+        }
+
+        // ===================================================================
+        // 4. LOGICA AMMINISTRATORE (VEDE E MODIFICA TUTTO)
+        // ===================================================================
+        function loadAdminDashboard() {
+            document.getElementById('adm-kpi-players').textContent = dbPlayers.length;
+            document.getElementById('adm-kpi-scouts').textContent = dbProfiles.filter(p => p.role === 'scout').length;
+            document.getElementById('adm-kpi-clubs').textContent = dbProfiles.filter(p => p.role === 'club').length;
+            setAdminTab(adminTab);
+        }
+
+        function setAdminTab(tab) {
+            adminTab = tab;
+            ['players', 'scouts', 'clubs'].forEach(t => {
+                document.getElementById(`admtab-${t}`).className = t === tab
+                    ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white'
+                    : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted';
+            });
+            const box = document.getElementById('admin-content-container');
+            if (tab === 'players') {
+                box.innerHTML = `<table class="w-full text-left text-xs sm:text-sm border-collapse min-w-[600px]">
+                    <thead class="bg-canvas border-b border-line text-muted"><tr><th class="p-3">Nome</th><th class="p-3">Club / Tipo</th><th class="p-3">Ruolo</th><th class="p-3">Media</th><th class="p-3 text-right">Azioni</th></tr></thead>
+                    <tbody class="divide-y divide-line">${dbPlayers.map(p => {
+                        const st = getPlayerStats(p.id);
+                        return `<tr>
+                            <td class="p-3 font-semibold">${esc(p.name)} <span class="text-xs text-muted">(${p.dob ? p.dob.slice(0,4) : '-'})</span></td>
+                            <td class="p-3">${esc(p.club || '-')} ${p.is_vivaio ? '<span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded ml-1">Vivaio</span>' : ''}</td>
+                            <td class="p-3">${esc(p.role_category)}</td>
+                            <td class="p-3 font-bold text-accent">${st.avg !== null ? st.avg.toFixed(1) : '—'} (${st.count})</td>
+                            <td class="p-3 text-right space-x-2">
+                                <button onclick="openDetailModal('${p.id}')" class="text-xs text-accent font-semibold">Vedi</button>
+                                <button onclick="openAdminEdit('player', '${p.id}')" class="text-xs text-ink font-semibold underline">Modifica</button>
+                            </td>
+                        </tr>`;
+                    }).join('')}</tbody></table>`;
+            } else {
+                const roleFilter = tab === 'scouts' ? 'scout' : 'club';
+                const list = dbProfiles.filter(u => u.role === roleFilter);
+                box.innerHTML = `<table class="w-full text-left text-xs sm:text-sm border-collapse min-w-[600px]">
+                    <thead class="bg-canvas border-b border-line text-muted"><tr><th class="p-3">Nome</th><th class="p-3">Organizzazione / Qualifica</th><th class="p-3">Email</th><th class="p-3">Città</th><th class="p-3 text-right">Azioni</th></tr></thead>
+                    <tbody class="divide-y divide-line">${list.map(u => `<tr>
+                        <td class="p-3 font-semibold">${esc(u.full_name)}</td>
+                        <td class="p-3">${esc(u.organization || '-')}</td>
+                        <td class="p-3 text-muted">${esc(u.email || '-')}</td>
+                        <td class="p-3">${esc(u.city || '-')}</td>
+                        <td class="p-3 text-right"><button onclick="openAdminEdit('profile', '${u.id}')" class="text-xs text-accent font-semibold underline">Modifica</button></td>
+                    </tr>`).join('')}</tbody></table>`;
+            }
+        }
+
+        function openAdminEdit(type, id) {
+            adminEditContext = { type, id };
+            const f = document.getElementById('admin-edit-fields');
+            if (type === 'player') {
+                const p = dbPlayers.find(x => x.id === id);
+                f.innerHTML = `
+                    <div><label class="text-xs font-semibold block mb-1">Nome</label><input id="ae-1" value="${esc(p.name)}" class="w-full min-h-[40px] px-3 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Club</label><input id="ae-2" value="${esc(p.club)}" class="w-full min-h-[40px] px-3 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Residenza</label><input id="ae-3" value="${esc(p.residence)}" class="w-full min-h-[40px] px-3 border border-line rounded-md text-sm"></div>`;
+            } else {
+                const u = dbProfiles.find(x => x.id === id);
+                f.innerHTML = `
+                    <div><label class="text-xs font-semibold block mb-1">Nome</label><input id="ae-1" value="${esc(u.full_name)}" class="w-full min-h-[40px] px-3 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Organizzazione / Qualifica</label><input id="ae-2" value="${esc(u.organization)}" class="w-full min-h-[40px] px-3 border border-line rounded-md text-sm"></div>
+                    <div><label class="text-xs font-semibold block mb-1">Città</label><input id="ae-3" value="${esc(u.city)}" class="w-full min-h-[40px] px-3 border border-line rounded-md text-sm"></div>`;
+            }
+            document.getElementById('admin-edit-modal').classList.remove('hidden');
+        }
+
+        function closeAdminEditModal() { document.getElementById('admin-edit-modal').classList.add('hidden'); }
+
+        async function saveAdminEdit() {
+            const v1 = document.getElementById('ae-1').value.trim();
+            const v2 = document.getElementById('ae-2').value.trim();
+            const v3 = document.getElementById('ae-3').value.trim();
+            if (adminEditContext.type === 'player') {
+                const p = dbPlayers.find(x => x.id === adminEditContext.id);
+                p.name = v1; p.club = v2; p.residence = v3;
+                if (IS_CLOUD) await sb.from('players').update({ name: v1, club: v2, residence: v3 }).eq('id', p.id);
+            } else {
+                const u = dbProfiles.find(x => x.id === adminEditContext.id);
+                u.full_name = v1; u.organization = v2; u.city = v3;
+                if (IS_CLOUD) await sb.from('profiles').update({ full_name: v1, organization: v2, city: v3 }).eq('id', u.id);
+            }
+            closeAdminEditModal();
+            loadAdminDashboard();
+            showToast('Dati aggiornati!', 'success');
+        }
+
+        // ===================================================================
+        // SHARED CARDS, DETAIL MODAL & PDF
+        // ===================================================================
+        function renderPlayerCard(p) {
+            const st = getPlayerStats(p.id);
+            return `<div class="bg-white rounded-lg p-5 border border-line hover:border-ink/30 transition flex flex-col justify-between gap-4">
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-semibold bg-canvas text-ink px-2 py-0.5 rounded border border-line">${esc(p.role_category)}</span>
+                        <span class="text-xs text-muted font-medium">${p.dob ? p.dob.slice(0,4) : '-'} • ${esc(p.foot)}</span>
+                    </div>
+                    <h3 class="font-semibold text-base text-ink">${esc(p.name)}</h3>
+                    <p class="text-xs text-muted mt-0.5">${esc(p.club || 'Svincolato')} • ${esc(p.residence || '-')}</p>
+                    <div class="mt-3 p-2.5 bg-canvas rounded-md border border-line flex items-center justify-between text-xs">
+                        <span><i class="fa-solid fa-star text-amber-500 mr-1"></i><strong>${st.avg !== null ? st.avg.toFixed(1) : '—'}</strong> Media T.I.P.S.</span>
+                        <span class="text-muted">${st.count} oss.</span>
+                    </div>
+                </div>
+                <button onclick="openDetailModal('${p.id}')" class="w-full min-h-[40px] rounded-md bg-ink hover:bg-ink/90 text-white text-xs font-semibold">Apri Dossier & Voti</button>
+            </div>`;
+        }
+
+        function openDetailModal(pid) {
+            currentDetailPlayerId = pid;
+            const p = dbPlayers.find(x => x.id === pid); if (!p) return;
+            const st = getPlayerStats(pid);
+            document.getElementById('dm-name').textContent = p.name;
+            document.getElementById('dm-meta').textContent = `${p.role_category} • ${p.club || '-'} • Anno ${p.dob ? p.dob.slice(0,4) : '-'} • ${p.residence || '-'}`;
+            document.getElementById('dm-stats-bar').innerHTML = `
+                <div><div class="text-xs text-muted">Media T.I.P.S. Aggregata</div><div class="text-2xl font-bold text-ink">${st.avg !== null ? st.avg.toFixed(1) : '—'} <span class="text-xs font-normal text-muted">(${st.count} osservazioni)</span></div></div>
+                <div class="text-xs text-muted">Piede: <strong class="text-ink">${esc(p.foot)}</strong> • ${esc(p.height || '-')}cm / ${esc(p.weight || '-')}kg</div>`;
+            document.getElementById('dm-reviews-list').innerHTML = st.list.length === 0
+                ? '<p class="text-sm text-muted text-center py-4">Nessuna osservazione registrata.</p>'
+                : st.list.map(r => `<div class="p-4 bg-canvas/60 rounded-md border border-line space-y-2">
+                    <div class="flex justify-between text-xs"><strong>${esc(r.observer_name)} (${esc(r.observer_role || 'Scout')})</strong><span class="font-bold text-accent">Media ${Number(r.avg).toFixed(1)}</span></div>
+                    <div class="flex flex-wrap gap-1.5">${Object.entries(r.scores||{}).map(([k,v])=>`<span class="px-2 py-0.5 bg-white border border-line rounded text-[11px]">${esc(k)}: <strong>${v}</strong></span>`).join('')}</div>
+                    <p class="text-xs text-ink bg-white p-3 rounded border border-line">${esc(r.notes)}</p>
+                    <div class="flex justify-between text-[11px] text-muted"><span>${formatDateIT(r.obs_date)} • ${esc(r.location)} (${esc(r.context)})</span><strong class="text-ink">${esc(r.outcome)}</strong></div>
+                </div>`).join('');
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
+
+        async function exportDetailPDF() {
+            const p = dbPlayers.find(x => x.id === currentDetailPlayerId); if (!p) return;
+            const st = getPlayerStats(p.id);
+            const pa = document.getElementById('print-area');
+            pa.innerHTML = `<div class="pdf-sheet"><div>
+                <div style="border-bottom:2px solid #1D1D1F;padding-bottom:8px;margin-bottom:14px;display:flex;justify-content:space-between;">
+                    <div><div style="font-size:9px;color:#0071E3;font-weight:700;">SCOUTING DEPARTMENT</div><div style="font-size:20px;font-weight:700;">${esc(p.name)}</div><div style="font-size:10px;color:#6E6E73;">${esc(p.role_category)} • ${esc(p.club||'-')} • ${esc(p.residence||'-')}</div></div>
+                    <div style="font-size:12px;font-weight:700;">Media T.I.P.S.: ${st.avg ?? 'N/D'} (${st.count} oss.)</div>
+                </div>
+                ${st.list.map(r => `<div style="border:1px solid #E5E5EA;padding:8px;margin-bottom:8px;border-radius:4px;font-size:9px;"><strong>${esc(r.observer_name)}</strong> (${formatDateIT(r.obs_date)}) — Media <strong>${r.avg}</strong> — <em>${esc(r.outcome)}</em><p style="margin:4px 0 0 0;">${esc(r.notes)}</p></div>`).join('')}
+            </div><div style="font-size:8px;color:#6E6E73;border-top:1px solid #E5E5EA;padding-top:6px;">Report Riservato — ${new Date().toLocaleDateString('it-IT')}</div></div>`;
+            window.print();
+        }
+    </script>
+</body>
+</html>
