@@ -43,20 +43,11 @@
         input[type="range"].scout-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 6px; background: #FFF; border: 2px solid #0071E3; box-shadow: 0 2px 5px rgba(0,0,0,0.14); cursor: pointer; }
         input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid #0071E3; outline-offset: 1px; }
 
-        /* A4 Professional Print Styles */
-        .pdf-doc {
-            width: 210mm;
-            min-height: 297mm;
-            background: #FFFFFF;
-            color: #1D1D1F;
-            padding: 14mm 15mm;
-            margin: 0 auto;
-            box-sizing: border-box;
-        }
+        .pdf-doc { width: 210mm; min-height: 297mm; background: #FFF; color: #1D1D1F; padding: 14mm 15mm; margin: 0 auto; box-sizing: border-box; }
         .avoid-break { page-break-inside: avoid; break-inside: avoid; }
         @media print {
             @page { size: A4 portrait; margin: 10mm 0; }
-            body { background: #FFFFFF !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { background: #FFF !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             .no-print { display: none !important; }
             #print-area { display: block !important; width: 100% !important; }
             .pdf-doc { width: 100% !important; min-height: auto !important; padding: 4mm 12mm !important; }
@@ -200,8 +191,6 @@
             <!-- DATI ESSENZIALI, FOTO & PRIVACY -->
             <div class="bg-white rounded-lg p-5 sm:p-6 border border-line space-y-5">
                 <h2 class="font-semibold text-base text-ink pb-3 border-b border-line">Foto, Dati Essenziali & Consenso Privacy</h2>
-
-                <!-- Upload Foto Atleta -->
                 <div class="flex items-center gap-4 p-4 bg-canvas/50 rounded-md border border-line">
                     <img id="pp-photo-preview" src="https://placehold.co/160x160/E5E5EA/6E6E73?text=FOTO" class="w-20 h-20 rounded-md object-cover border border-line bg-white flex-shrink-0">
                     <div class="space-y-1.5">
@@ -213,23 +202,17 @@
                         </label>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div><label class="text-xs font-semibold block mb-1">Nome e Cognome *</label><input id="pp-name" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                     <div><label class="text-xs font-semibold block mb-1">Data di Nascita *</label><input type="date" id="pp-dob" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                     <div><label class="text-xs font-semibold block mb-1">Residenza *</label><input id="pp-residence" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                     <div><label class="text-xs font-semibold block mb-1">Società Attuale</label><input id="pp-club" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                     <div><label class="text-xs font-semibold block mb-1">Categoria</label><input id="pp-league" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
-                    <div><label class="text-xs font-semibold block mb-1">Reparto</label>
-                        <select id="pp-role-cat" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option></select>
-                    </div>
-                    <div><label class="text-xs font-semibold block mb-1">Piede</label>
-                        <select id="pp-foot" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select>
-                    </div>
+                    <div><label class="text-xs font-semibold block mb-1">Reparto</label><select id="pp-role-cat" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option></select></div>
+                    <div><label class="text-xs font-semibold block mb-1">Piede</label><select id="pp-foot" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select></div>
                     <div><label class="text-xs font-semibold block mb-1">Altezza (cm)</label><input type="number" id="pp-height" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                     <div><label class="text-xs font-semibold block mb-1">Peso (kg)</label><input type="number" id="pp-weight" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                 </div>
-
                 <div class="p-4 rounded-md bg-emerald-50/70 border border-emerald-200 space-y-3">
                     <input id="pp-guardian" placeholder="Nome Genitore / Tutore (obbligatorio se minorenne)" class="w-full min-h-[42px] px-3 bg-white border border-emerald-300 rounded-md text-sm">
                     <label class="flex items-start gap-2.5 cursor-pointer">
@@ -244,12 +227,13 @@
         </main>
 
         <!-- ================================================================= -->
-        <!-- 2. DASHBOARD SCOUT                                                -->
+        <!-- 2. DASHBOARD SCOUT (4 TAB: GIOCATORI, RICHIESTE, CLUB, PROFILO)   -->
         <!-- ================================================================= -->
         <main id="role-view-scout" class="no-print hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-5">
-            <div class="grid grid-cols-3 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
                 <button onclick="setScoutTab('players')" id="stab-players" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">Giocatori</button>
                 <button onclick="setScoutTab('requests')" id="stab-requests" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Richieste Società</button>
+                <button onclick="setScoutTab('clubs')" id="stab-clubs" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">I Miei Club</button>
                 <button onclick="setScoutTab('profile')" id="stab-profile" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Il Mio Profilo</button>
             </div>
 
@@ -280,7 +264,16 @@
                 <div id="scout-requests-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
-            <!-- SCOUT TAB 3: PROFILO SCOUT + FOTO -->
+            <!-- SCOUT TAB 3: I MIEI CLUB / FREELANCE -->
+            <div id="scout-panel-clubs" class="hidden space-y-4">
+                <div>
+                    <h2 class="text-xl font-bold text-ink">Affiliazione Club</h2>
+                    <p class="text-xs text-muted">Se non sei affiliato a nessun club operi come <strong>Freelance</strong>. Puoi richiedere l'accesso ai Talenti del Vivaio di una o più società.</p>
+                </div>
+                <div id="scout-clubs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- SCOUT TAB 4: PROFILO SCOUT + FOTO -->
             <div id="scout-panel-profile" class="hidden max-w-2xl mx-auto bg-white rounded-lg p-5 sm:p-6 border border-line space-y-5">
                 <h2 class="text-lg font-bold text-ink pb-3 border-b border-line">Modifica i Tuoi Dati (Scout)</h2>
                 <div class="flex items-center gap-4 p-4 bg-canvas/50 rounded-md border border-line">
@@ -313,7 +306,10 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
                 <button onclick="setClubTab('showcase')" id="ctab-showcase" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">Vetrina</button>
                 <button onclick="setClubTab('vivaio')" id="ctab-vivaio" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Vivaio</button>
-                <button onclick="setClubTab('requests')" id="ctab-requests" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Richieste Scout</button>
+                <button onclick="setClubTab('requests')" id="ctab-requests" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted flex items-center justify-center gap-1.5">
+                    <span>Scout & Richieste</span>
+                    <span id="club-tab-notif-dot" class="hidden px-1.5 py-0.5 rounded-full bg-crimson text-white text-[10px] font-bold">0</span>
+                </button>
                 <button onclick="setClubTab('profile')" id="ctab-profile" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Profilo Club</button>
             </div>
 
@@ -332,7 +328,10 @@
             <!-- VIVAIO -->
             <div id="club-panel-vivaio" class="hidden space-y-5">
                 <div class="bg-white rounded-lg p-5 border border-line space-y-4">
-                    <h2 class="text-lg font-bold text-ink">Inserisci un Talento del Tuo Vivaio</h2>
+                    <div>
+                        <h2 class="text-lg font-bold text-ink">Inserisci un Talento del Tuo Vivaio</h2>
+                        <p class="text-xs text-muted">Visibile solo alla tua società e agli scout che hai accettato in <strong>Scout & Richieste</strong>.</p>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                         <input id="viv-name" placeholder="Nome e Cognome *" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
                         <input type="date" id="viv-dob" value="2013-01-01" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
@@ -344,10 +343,20 @@
                 <div id="club-vivaio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
 
-            <!-- RICHIESTE -->
+            <!-- SCOUT AFFILIATI & RICHIESTE -->
             <div id="club-panel-requests" class="hidden space-y-5">
+                <!-- Notifiche Affiliazione Scout -->
+                <div class="bg-white rounded-lg p-5 border border-line space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-base font-bold text-ink">Scout del Club & Richieste di Affiliazione</h2>
+                        <span id="club-pending-badge" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded bg-amber-100 text-amber-800">0 in attesa</span>
+                    </div>
+                    <div id="club-affiliations-list" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Richieste di mercato agli scout -->
                 <div class="bg-white rounded-lg p-5 border border-line space-y-4">
-                    <h2 class="text-lg font-bold text-ink">Nuova Richiesta per gli Scout</h2>
+                    <h2 class="text-base font-bold text-ink">Nuova Richiesta di Ricerca per gli Scout</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input id="creq-title" placeholder="Es. Cerchiamo Esterno Sinistro" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
                         <input id="creq-years" placeholder="Annate (es. 2011 - 2012)" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
@@ -479,13 +488,9 @@
         </div>
     </div>
 
-    <!-- DEDICATED PRINT / PDF AREA -->
     <div id="print-area" class="hidden"></div>
 
     <script>
-        // ===================================================================
-        // INCOLLA QUI I TUOI DATI SUPABASE
-        // ===================================================================
         const SUPABASE_URL = 'https://zvulvawucmbycjoragvl.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2dWx2YXd1Y21ieWNqb3JhZ3ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyNzAyNTAsImV4cCI6MjExMDg0NjI1MH0.PXVx1cSsMn3Ywpx8fjCpC6tD5uS7mhBOHJQ8oKqHEZQ';
 
@@ -504,7 +509,7 @@
         let evaluatingPlayerId = null, obsDraftScores = {}, currentDetailPlayerId = null;
         let adminTab = 'players', adminEditContext = null;
         let draftPlayerPhoto = null, draftAvatarPhoto = null;
-        let dbProfiles = [], dbPlayers = [], dbObservations = [], dbRequests = [];
+        let dbProfiles = [], dbPlayers = [], dbObservations = [], dbRequests = [], dbClubs = [], dbAffiliations = [];
 
         function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
         function todayISO() { return new Date().toISOString().slice(0, 10); }
@@ -518,7 +523,6 @@
             setTimeout(() => el.remove(), 3500);
         }
 
-        // IMAGE COMPRESSION HELPER (Zero CORS issues in PDF, lightweight for Supabase)
         function handleUploadImage(event, target) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -536,17 +540,9 @@
                     ctx.fillRect(0, 0, w, h);
                     ctx.drawImage(img, 0, 0, w, h);
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-                    if (target === 'player') {
-                        draftPlayerPhoto = dataUrl;
-                        document.getElementById('pp-photo-preview').src = dataUrl;
-                    } else if (target === 'scout') {
-                        draftAvatarPhoto = dataUrl;
-                        document.getElementById('sp-avatar-preview').src = dataUrl;
-                    } else if (target === 'club') {
-                        draftAvatarPhoto = dataUrl;
-                        document.getElementById('cp-avatar-preview').src = dataUrl;
-                    }
+                    if (target === 'player') { draftPlayerPhoto = dataUrl; document.getElementById('pp-photo-preview').src = dataUrl; }
+                    else if (target === 'scout') { draftAvatarPhoto = dataUrl; document.getElementById('sp-avatar-preview').src = dataUrl; }
+                    else if (target === 'club') { draftAvatarPhoto = dataUrl; document.getElementById('cp-avatar-preview').src = dataUrl; }
                     showToast('Immagine pronta! Clicca Salva per confermare.', 'info');
                 };
                 img.src = e.target.result;
@@ -558,7 +554,7 @@
         window.onload = async function () {
             document.getElementById('obs-date').value = todayISO();
             document.getElementById('pm-date').value = todayISO();
-            if (!sb) return showToast('Inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.', 'error');
+            if (!sb) return showToast('Supabase non connesso.', 'error');
 
             const isRecovery = window.location.hash.includes('type=recovery') || window.location.hash.includes('type=magiclink');
             sb.auth.onAuthStateChange(async (event, session) => {
@@ -635,13 +631,21 @@
         }
 
         async function syncAllFromCloud() {
-            const [pRes, oRes, rRes] = await Promise.all([
+            const [pRes, oRes, rRes, aRes] = await Promise.all([
                 sb.from('players').select('*'),
                 sb.from('observations').select('*').order('obs_date', { ascending: false }),
-                sb.from('scout_requests').select('*').order('created_at', { ascending: false })
+                sb.from('scout_requests').select('*').order('created_at', { ascending: false }),
+                sb.from('scout_club_affiliations').select('*').order('created_at', { ascending: false })
             ]);
-            dbPlayers = pRes.data || []; dbObservations = oRes.data || []; dbRequests = rRes.data || [];
-            if (currentUser.role === 'admin') { const profRes = await sb.from('profiles').select('*'); dbProfiles = profRes.data || []; }
+            dbPlayers = pRes.data || []; dbObservations = oRes.data || []; dbRequests = rRes.data || []; dbAffiliations = aRes.data || [];
+            if (currentUser.role === 'scout') {
+                const cRes = await sb.from('profiles').select('*').eq('role', 'club');
+                dbClubs = cRes.data || [];
+            }
+            if (currentUser.role === 'admin') {
+                const profRes = await sb.from('profiles').select('*');
+                dbProfiles = profRes.data || [];
+            }
         }
 
         function enterAppShell() {
@@ -754,7 +758,7 @@
         }
 
         // ===================================================================
-        // 2. SCOUT
+        // 2. SCOUT (GIOCATORI, RICHIESTE, I MIEI CLUB, PROFILO)
         // ===================================================================
         function loadScoutDashboard() {
             const years = [...new Set(dbPlayers.map(p => p.dob ? p.dob.slice(0,4) : null).filter(Boolean))].sort((a,b) => b - a);
@@ -764,11 +768,11 @@
             document.getElementById('sp-phone').value = currentUser.phone || '';
             document.getElementById('sp-org').value = currentUser.organization || '';
             document.getElementById('sp-city').value = currentUser.city || '';
-            setScoutTab('players'); renderScoutPlayersList(); renderScoutRequests();
+            setScoutTab('players'); renderScoutPlayersList(); renderScoutRequests(); renderScoutClubs();
         }
 
         function setScoutTab(tab) {
-            ['players', 'requests', 'profile'].forEach(t => {
+            ['players', 'requests', 'clubs', 'profile'].forEach(t => {
                 document.getElementById(`scout-panel-${t}`).classList.toggle('hidden', t !== tab);
                 document.getElementById(`stab-${t}`).className = t === tab ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white' : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted';
             });
@@ -815,7 +819,7 @@
                             <img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" class="w-12 h-12 rounded-md object-cover border border-line flex-shrink-0">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-1 mb-1">${badge}<span class="text-[11px] text-muted">${p.dob ? p.dob.slice(0,4) : '-'}</span></div>
-                                <h3 class="font-semibold text-base text-ink truncate">${esc(p.name)}</h3>
+                                <h3 class="font-semibold text-base text-ink truncate">${esc(p.name)} ${p.is_vivaio ? '<span class="text-[10px] bg-amber-50 text-amber-800 px-1.5 py-0.5 rounded ml-1">Vivaio</span>' : ''}</h3>
                                 <p class="text-xs text-muted truncate">${esc(p.role_category)} • ${esc(p.club || 'Svincolato')}</p>
                             </div>
                         </div>
@@ -827,6 +831,50 @@
                     </div>
                 </div>`;
             }).join('');
+        }
+
+        function renderScoutClubs() {
+            const box = document.getElementById('scout-clubs-list');
+            if (!dbClubs.length) return box.innerHTML = '<div class="col-span-full bg-white p-6 rounded-lg border border-line text-sm text-muted text-center">Nessuna società registrata al momento.</div>';
+            box.innerHTML = dbClubs.map(c => {
+                const aff = dbAffiliations.find(a => a.scout_id === currentUser.id && a.club_id === c.id);
+                let badge = `<span class="text-[11px] bg-canvas text-muted px-2 py-0.5 rounded border border-line">Freelance</span>`;
+                let actionHtml = `<button onclick="requestClubAffiliation('${c.id}', '${esc(c.organization || c.full_name)}')" class="w-full min-h-[38px] rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Richiedi Affiliazione</button>`;
+                if (aff?.status === 'pending') {
+                    badge = `<span class="text-[11px] bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200">In attesa di conferma</span>`;
+                    actionHtml = `<button disabled class="w-full min-h-[38px] rounded-md bg-canvas text-muted text-xs font-semibold cursor-not-allowed">Richiesta Inviata</button>`;
+                } else if (aff?.status === 'approved') {
+                    badge = `<span class="text-[11px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Affiliato (Vivaio attivo)</span>`;
+                    actionHtml = `<button onclick="leaveClubAffiliation('${aff.id}')" class="w-full min-h-[38px] rounded-md bg-white border border-line hover:border-crimson text-crimson text-xs font-semibold">Rimuovi Affiliazione</button>`;
+                } else if (aff?.status === 'rejected') {
+                    badge = `<span class="text-[11px] bg-crimson-soft text-crimson px-2 py-0.5 rounded">Richiesta Rifiutata</span>`;
+                    actionHtml = `<button disabled class="w-full min-h-[38px] rounded-md bg-canvas text-muted text-xs font-semibold cursor-not-allowed">Non autorizzato</button>`;
+                }
+                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">${badge}<span class="text-xs text-muted">${esc(c.city || '-')}</span></div>
+                        <div class="flex items-center gap-3 mt-1">
+                            ${c.avatar_url ? `<img src="${esc(c.avatar_url)}" class="w-10 h-10 rounded object-contain border border-line p-0.5 bg-white">` : ''}
+                            <div><h3 class="font-semibold text-base text-ink">${esc(c.organization || c.full_name)}</h3><p class="text-xs text-muted">${esc(c.category || 'Società Calcistica')}</p></div>
+                        </div>
+                    </div>
+                    ${actionHtml}
+                </div>`;
+            }).join('');
+        }
+
+        async function requestClubAffiliation(clubId, clubName) {
+            const rec = { id: 'aff-' + Date.now(), scout_id: currentUser.id, club_id: clubId, scout_name: currentUser.full_name, scout_email: currentUser.email, club_name: clubName, status: 'pending' };
+            const { error } = await sb.from('scout_club_affiliations').insert(rec);
+            if (error) return showToast(error.message, 'error');
+            dbAffiliations.unshift(rec); renderScoutClubs(); showToast('Richiesta inviata alla società!', 'success');
+        }
+
+        async function leaveClubAffiliation(affId) {
+            await sb.from('scout_club_affiliations').delete().eq('id', affId);
+            dbAffiliations = dbAffiliations.filter(a => a.id !== affId);
+            await syncAllFromCloud(); renderScoutClubs(); renderScoutPlayersList();
+            showToast('Affiliazione rimossa.', 'info');
         }
 
         function openEvaluateModal(pid) {
@@ -873,8 +921,12 @@
 
         function renderScoutRequests() {
             const box = document.getElementById('scout-requests-list');
-            if (!dbRequests.length) return box.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessuna richiesta attiva.</div>';
-            box.innerHTML = dbRequests.map(r => `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between mb-2"><span class="text-[11px] font-semibold px-2 py-0.5 rounded ${r.request_type === 'vivaio' ? 'bg-amber-50 text-amber-800' : 'bg-accent-soft text-accent'}">${r.request_type === 'vivaio' ? 'Talento Vivaio' : 'Esigenza Club'}</span><span class="text-xs text-muted">${esc(r.club_name)}</span></div><h3 class="font-semibold text-base text-ink">${esc(r.title)}</h3><p class="text-xs text-ink bg-canvas p-3 rounded-md border border-line mt-2">${esc(r.notes || '-')}</p></div>${r.player_id ? `<button onclick="openEvaluateModal('${r.player_id}')" class="w-full min-h-[40px] rounded-md bg-accent text-white text-xs font-semibold">Valuta questo Talento</button>` : ''}</div>`).join('');
+            const visibleReqs = dbRequests.filter(r => {
+                if (r.request_type !== 'vivaio') return true;
+                return dbAffiliations.some(a => a.scout_id === currentUser.id && a.club_id === r.club_id && a.status === 'approved');
+            });
+            if (!visibleReqs.length) return box.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessuna richiesta attiva.</div>';
+            box.innerHTML = visibleReqs.map(r => `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between mb-2"><span class="text-[11px] font-semibold px-2 py-0.5 rounded ${r.request_type === 'vivaio' ? 'bg-amber-50 text-amber-800' : 'bg-accent-soft text-accent'}">${r.request_type === 'vivaio' ? 'Talento Vivaio' : 'Esigenza Club'}</span><span class="text-xs text-muted">${esc(r.club_name)}</span></div><h3 class="font-semibold text-base text-ink">${esc(r.title)}</h3><p class="text-xs text-ink bg-canvas p-3 rounded-md border border-line mt-2">${esc(r.notes || '-')}</p></div>${r.player_id ? `<button onclick="openEvaluateModal('${r.player_id}')" class="w-full min-h-[40px] rounded-md bg-accent text-white text-xs font-semibold">Valuta questo Talento</button>` : ''}</div>`).join('');
         }
 
         async function saveOwnProfile(role) {
@@ -888,7 +940,7 @@
         }
 
         // ===================================================================
-        // 3. SOCIETÀ
+        // 3. SOCIETÀ (VETRINA, VIVAIO, AFFILIAZIONI SCOUT, PROFILO)
         // ===================================================================
         function loadClubDashboard() {
             const years = [...new Set(dbPlayers.map(p => p.dob ? p.dob.slice(0,4) : null).filter(Boolean))].sort((a,b) => b - a);
@@ -899,14 +951,49 @@
             document.getElementById('cp-phone').value = currentUser.phone || '';
             document.getElementById('cp-city').value = currentUser.city || '';
             document.getElementById('cp-category').value = currentUser.category || '';
-            setClubTab('showcase'); renderClubShowcase(); renderClubVivaio(); renderClubMyRequests();
+            setClubTab('showcase'); renderClubShowcase(); renderClubVivaio(); renderClubAffiliations(); renderClubMyRequests();
         }
 
         function setClubTab(tab) {
             ['showcase', 'vivaio', 'requests', 'profile'].forEach(t => {
                 document.getElementById(`club-panel-${t}`).classList.toggle('hidden', t !== tab);
-                document.getElementById(`ctab-${t}`).className = t === tab ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white' : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted';
+                const btn = document.getElementById(`ctab-${t}`);
+                btn.className = t === tab
+                    ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white flex items-center justify-center gap-1.5'
+                    : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted flex items-center justify-center gap-1.5';
             });
+        }
+
+        function renderClubAffiliations() {
+            const mine = dbAffiliations.filter(a => a.club_id === currentUser.id);
+            const pending = mine.filter(a => a.status === 'pending').length;
+            const badge = document.getElementById('club-pending-badge'), dot = document.getElementById('club-tab-notif-dot');
+            if (pending > 0) {
+                badge.textContent = `${pending} in attesa`; badge.classList.remove('hidden');
+                dot.textContent = pending; dot.classList.remove('hidden');
+            } else { badge.classList.add('hidden'); dot.classList.add('hidden'); }
+
+            const box = document.getElementById('club-affiliations-list');
+            if (!mine.length) return box.innerHTML = '<p class="text-xs text-muted">Nessuna richiesta di affiliazione da parte di scout.</p>';
+            box.innerHTML = mine.map(a => `
+                <div class="p-3.5 rounded-md bg-canvas border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                    <div>
+                        <strong class="text-sm text-ink">${esc(a.scout_name)}</strong> <span class="text-muted">(${esc(a.scout_email || '-')})</span>
+                        <div class="text-muted mt-0.5">Stato: <strong>${a.status === 'pending' ? 'In attesa di risposta' : (a.status === 'approved' ? 'Approvato — Vede il Vivaio' : 'Rifiutato')}</strong></div>
+                    </div>
+                    <div class="flex gap-2">
+                        ${a.status !== 'approved' ? `<button onclick="respondClubAffiliation('${a.id}', 'approved')" class="min-h-[34px] px-3 rounded-md bg-emerald-700 text-white font-semibold">Accetta</button>` : ''}
+                        ${a.status !== 'rejected' ? `<button onclick="respondClubAffiliation('${a.id}', 'rejected')" class="min-h-[34px] px-3 rounded-md bg-white border border-line text-crimson font-semibold">Rifiuta</button>` : ''}
+                    </div>
+                </div>`).join('');
+        }
+
+        async function respondClubAffiliation(affId, newStatus) {
+            const { error } = await sb.from('scout_club_affiliations').update({ status: newStatus }).eq('id', affId);
+            if (error) return showToast(error.message, 'error');
+            const item = dbAffiliations.find(a => a.id === affId); if (item) item.status = newStatus;
+            renderClubAffiliations();
+            showToast(newStatus === 'approved' ? 'Scout accettato! Ora può vedere il tuo Vivaio.' : 'Richiesta rifiutata.', 'success');
         }
 
         function renderClubShowcase() {
@@ -961,7 +1048,7 @@
             const req = { id: 'req-' + Date.now(), club_id: currentUser.id, club_name: currentUser.organization || currentUser.full_name, request_type: 'vivaio', player_id: p.id, title: `Valutazione Vivaio: ${p.name}`, role_needed: p.role_category, birth_year_range: p.dob ? p.dob.slice(0,4) : '-', notes: 'Richiesta valutazione tecnica T.I.P.S.', status: 'open' };
             const { error } = await sb.from('scout_requests').insert(req);
             if (error) return showToast(error.message, 'error');
-            dbRequests.unshift(req); renderClubVivaio(); renderClubMyRequests(); showToast('Richiesta inviata!', 'success');
+            dbRequests.unshift(req); renderClubVivaio(); renderClubMyRequests(); showToast('Richiesta inviata agli scout del club!', 'success');
         }
 
         async function createGeneralClubRequest() {
@@ -1015,7 +1102,7 @@
         }
 
         // ===================================================================
-        // DETAIL MODAL & REPORT PDF PROFESSIONALE COMPLETO
+        // DETAIL MODAL & REPORT PDF PROFESSIONALE
         // ===================================================================
         function openDetailModal(pid) {
             currentDetailPlayerId = pid;
@@ -1025,18 +1112,8 @@
             document.getElementById('dm-name').textContent = p.name;
             document.getElementById('dm-meta').textContent = `${p.role_category} • ${p.club || '-'} • Anno ${p.dob ? p.dob.slice(0,4) : '-'} • ${p.residence || '-'}`;
 
-            const barsHtml = Object.entries(st.keyAvgs).map(([k, v]) => `
-                <div class="bg-white p-2 rounded border border-line text-center">
-                    <div class="text-[10px] text-muted font-semibold">${esc(k)}</div>
-                    <div class="text-sm font-bold text-ink">${v.toFixed(1)}</div>
-                </div>`).join('');
-
-            document.getElementById('dm-stats-bar').innerHTML = `
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div><div class="text-xs text-muted">Media T.I.P.S. Aggregata</div><div class="text-2xl font-bold text-ink">${st.avg ?? '—'} <span class="text-xs font-normal text-muted">(${st.count} osservazioni)</span></div></div>
-                    <div class="text-xs text-muted">Piede: <strong class="text-ink">${esc(p.foot)}</strong> • ${esc(p.height||'-')}cm / ${esc(p.weight||'-')}kg</div>
-                </div>
-                ${barsHtml ? `<div class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-2 border-t border-line">${barsHtml}</div>` : ''}`;
+            const barsHtml = Object.entries(st.keyAvgs).map(([k, v]) => `<div class="bg-white p-2 rounded border border-line text-center"><div class="text-[10px] text-muted font-semibold">${esc(k)}</div><div class="text-sm font-bold text-ink">${v.toFixed(1)}</div></div>`).join('');
+            document.getElementById('dm-stats-bar').innerHTML = `<div class="flex flex-wrap items-center justify-between gap-3"><div><div class="text-xs text-muted">Media T.I.P.S. Aggregata</div><div class="text-2xl font-bold text-ink">${st.avg ?? '—'} <span class="text-xs font-normal text-muted">(${st.count} osservazioni)</span></div></div><div class="text-xs text-muted">Piede: <strong class="text-ink">${esc(p.foot)}</strong> • ${esc(p.height||'-')}cm / ${esc(p.weight||'-')}kg</div></div>${barsHtml ? `<div class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-2 border-t border-line">${barsHtml}</div>` : ''}`;
 
             const mBox = document.getElementById('dm-matches-box'), matches = Array.isArray(p.upcoming_matches) ? p.upcoming_matches : [];
             if (matches.length) {
@@ -1094,7 +1171,6 @@
             document.getElementById('print-area').innerHTML = `
                 <div class="pdf-doc">
                     <div>
-                        <!-- TOP BAR -->
                         <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1D1D1F;padding-bottom:10px;margin-bottom:16px;">
                             <div>
                                 <div style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:#0071E3;text-transform:uppercase;">SCOUTING DEPARTMENT • OFFICIAL PLAYER REPORT</div>
@@ -1102,8 +1178,6 @@
                             </div>
                             ${clubLogo}
                         </div>
-
-                        <!-- HERO PLAYER PROFILE -->
                         <div style="display:flex;gap:14px;align-items:center;background:#F5F5F7;border:1px solid #E5E5EA;border-radius:8px;padding:12px;margin-bottom:16px;">
                             <img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" style="width:78px;height:78px;border-radius:6px;object-fit:cover;border:1px solid #D2D2D7;background:#FFF;">
                             <div style="flex:1;">
@@ -1118,8 +1192,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- AGGREGATED T.I.P.S. SUMMARY -->
                         <div class="avoid-break" style="display:grid;grid-template-columns:1fr 1.6fr;gap:14px;margin-bottom:18px;">
                             <div style="background:#1D1D1F;color:#FFF;border-radius:8px;padding:14px;display:flex;flex-direction:column;justify-content:center;text-align:center;">
                                 <div style="font-size:9px;font-weight:600;letter-spacing:1px;color:#A1A1A6;text-transform:uppercase;">MEDIA GLOBALE T.I.P.S.</div>
@@ -1130,20 +1202,16 @@
                                 </div>
                                 <div style="font-size:8.5px;color:#A1A1A6;margin-top:4px;">${esc(verdictStr)}</div>
                             </div>
-
                             <div style="border:1px solid #E5E5EA;border-radius:8px;padding:12px;">
                                 <div style="font-size:10px;font-weight:700;color:#1D1D1F;text-transform:uppercase;margin-bottom:10px;">Medie per Parametro T.I.P.S.</div>
                                 ${barsPdf}
                             </div>
                         </div>
-
-                        <!-- CHRONOLOGICAL OBSERVATIONS -->
                         <div style="font-size:11px;font-weight:700;color:#1D1D1F;text-transform:uppercase;border-bottom:1px solid #E5E5EA;padding-bottom:5px;margin-bottom:10px;">
                             Storico Cronologico Osservazioni (${st.count})
                         </div>
                         ${obsPdf}
                     </div>
-
                     <div style="border-top:1px solid #E5E5EA;padding-top:8px;margin-top:20px;display:flex;justify-content:space-between;font-size:8.5px;color:#6E6E73;">
                         <span>Scouting Department — Documento Riservato ad uso interno</span>
                         <span>${esc(p.name)} • ${new Date().toLocaleDateString('it-IT')}</span>
