@@ -649,21 +649,23 @@
 
         // INIT & SUPABASE AUTH LISTENER
         window.onload = async function () {
-            if (IS_CLOUD) {
-    document.getElementById('demo-mode-box').classList.add('hidden');
-    const isRecovery = window.location.hash.includes('type=recovery') || window.location.hash.includes('type=magiclink');
+    document.getElementById('obs-date').value = todayISO();
+    if (IS_CLOUD) {
+        document.getElementById('demo-mode-box').classList.add('hidden');
+        const isRecovery = window.location.hash.includes('type=recovery') || window.location.hash.includes('type=magiclink');
 
-    sb.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && isRecovery)) {
-            showSetPasswordPanel();
-        } else if (session?.user && !isRecovery) {
-            await loadCloudSession(session.user);
+        sb.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && isRecovery)) {
+                showSetPasswordPanel();
+            } else if (session?.user && !isRecovery) {
+                await loadCloudSession(session.user);
+            }
+        });
+
+        if (!isRecovery) {
+            const { data } = await sb.auth.getSession();
+            if (data.session?.user) await loadCloudSession(data.session.user);
         }
-    });
-
-    if (!isRecovery) {
-        const { data } = await sb.auth.getSession();
-        if (data.session?.user) await loadCloudSession(data.session.user);
     }
 };
 
