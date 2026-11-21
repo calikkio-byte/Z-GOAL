@@ -8,29 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="tailwind.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="vendor/supabase-js-2.119.2.js"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'system-ui', 'sans-serif'],
-                    },
-                    colors: {
-                        canvas: '#F5F5F7',
-                        ink: '#1D1D1F',
-                        muted: '#6E6E73',
-                        line: '#E5E5EA',
-                        accent: { DEFAULT: '#0071E3', hover: '#0077ED', soft: '#EBF5FF' },
-                        crimson: { DEFAULT: '#D70015', soft: '#FFF0F0' }
-                    }
-                }
-            }
-        }
-    </script>
 
     <style>
         * {
@@ -538,8 +519,11 @@
         let draftPlayerPhoto = null, draftAvatarPhoto = null;
         let dbProfiles = [], dbPlayers = [], dbObservations = [], dbRequests = [], dbClubs = [], dbAffiliations = [];
 
-        function genCode(prefix) { return `${prefix}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`; }
-        function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        // Gli ID e i codici pubblici sono generati dal database (trigger). Qui solo ID locali casuali.
+        function newId(prefix) { return prefix + '-' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2, 10)); }
+        function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+        // Valore sicuro da inserire come argomento JS dentro un attributo HTML tra doppi apici: onclick="fn(${jsq(x)})"
+        function jsq(v) { return esc(JSON.stringify(String(v ?? ''))); }
         function todayISO() { return new Date().toISOString().slice(0, 10); }
         function formatDateIT(d) { if (!d) return '-'; const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d; }
         function calculateAge(iso) { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; const n = new Date(); let a = n.getFullYear() - d.getUTCFullYear(); if (n.getMonth() < d.getUTCMonth() || (n.getMonth() === d.getUTCMonth() && n.getDate() < d.getUTCDate())) a--; return a; }
@@ -633,7 +617,7 @@
         }
 
         async function handleSaveNewPassword() {
-            const pwd = document.getElementById('new-password-input').value; if (pwd.length < 6) return showToast('Minimo 6 caratteri.', 'error');
+            const pwd = document.getElementById('new-password-input').value; if (pwd.length < 8) return showToast('Minimo 8 caratteri.', 'error');
             const { data, error } = await sb.auth.updateUser({ password: pwd });
             if (error) return showToast(error.message, 'error');
             history.replaceState(null, '', window.location.pathname);
@@ -645,13 +629,13 @@
             if (isLoadingSession) return;
             isLoadingSession = true;
             try {
-                let { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+                const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
                 if (!prof) {
-                    const m = user.user_metadata || {};
-                    const role = m.role || 'scout';
-                    const prefix = role === 'scout' ? 'SCT' : (role === 'club' ? 'CLB' : (role === 'admin' ? 'ADM' : 'USR'));
-                    prof = { id: user.id, role, public_code: genCode(prefix), email: user.email, full_name: m.full_name || user.email, city: m.city || '', organization: m.organization || '' };
-                    await sb.from('profiles').upsert(prof);
+                    await sb.auth.signOut();
+                    currentUser = null;
+                    document.getElementById('view-auth').classList.remove('hidden');
+                    document.getElementById('app-shell').classList.add('hidden');
+                    return showToast('Profilo non trovato: la registrazione non e\' completa. Registrati scegliendo un ruolo.', 'error');
                 }
                 currentUser = prof;
                 draftAvatarPhoto = prof.avatar_url || null;
@@ -741,7 +725,7 @@
 
         async function claimPlayerByCode() {
             const code = document.getElementById('claim-code-input').value.trim().toUpperCase();
-            if (!code) return showToast('Inserisci un ID Atleta valido (es. ATL-12345).', 'error');
+            if (!code) return showToast('Inserisci un ID Atleta valido (es. ATL-1A2B3C4D5E6F).', 'error');
             const { error } = await sb.rpc('claim_player_by_code', { p_code: code });
             if (error) return showToast(error.message, 'error');
             await syncAllFromCloud();
@@ -754,7 +738,6 @@
             const existing = getMyPlayerRecord();
             const record = {
                 id: existing ? existing.id : ('p-' + currentUser.id),
-                public_code: existing?.public_code || genCode('ATL'),
                 owner_user_id: currentUser.id, club_owner_id: null, is_vivaio: false,
                 name, dob: document.getElementById('pp-dob').value || null,
                 residence: document.getElementById('pp-residence').value.trim(),
@@ -767,11 +750,11 @@
                 photo: draftPlayerPhoto || existing?.photo || null,
                 upcoming_matches: existing?.upcoming_matches || []
             };
-            const { error } = await sb.from('players').upsert(record);
+            const { data: saved, error } = await sb.from('players').upsert(record).select().single();
             if (error) return showToast(error.message, 'error');
-            const idx = dbPlayers.findIndex(x => x.id === record.id);
-            if (idx >= 0) dbPlayers[idx] = record; else dbPlayers.unshift(record);
-            showToast(`Scheda salvata! ID Atleta: ${record.public_code}`, 'success');
+            const idx = dbPlayers.findIndex(x => x.id === saved.id);
+            if (idx >= 0) dbPlayers[idx] = saved; else dbPlayers.unshift(saved);
+            showToast(`Scheda salvata! ID Atleta: ${saved.public_code}`, 'success');
             loadPlayerDashboard();
         }
 
@@ -870,8 +853,8 @@
                         ${nextMatch ? `<div class="p-2 rounded bg-accent-soft/60 border border-blue-200 text-[11px] text-ink"><i class="fa-solid fa-calendar text-accent mr-1"></i>${formatDateIT(nextMatch.date)} vs <strong>${esc(nextMatch.opponent)}</strong> (${esc(nextMatch.location)})</div>` : ''}
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="openEvaluateModal('${p.id}')" class="flex-1 min-h-[40px] rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Valuta T.I.P.S.</button>
-                        <button onclick="openDetailModal('${p.id}')" class="min-h-[40px] px-3.5 rounded-md bg-canvas border border-line text-ink text-xs font-semibold">Dossier (${st.count})</button>
+                        <button onclick="openEvaluateModal(${jsq(p.id)})" class="flex-1 min-h-[40px] rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Valuta T.I.P.S.</button>
+                        <button onclick="openDetailModal(${jsq(p.id)})" class="min-h-[40px] px-3.5 rounded-md bg-canvas border border-line text-ink text-xs font-semibold">Dossier (${st.count})</button>
                     </div>
                 </div>`;
             }).join('');
@@ -883,9 +866,9 @@
             box.innerHTML = dbClubs.map(c => {
                 const aff = dbAffiliations.find(a => a.scout_id === currentUser.id && a.club_id === c.id);
                 let badge = `<span class="text-[11px] bg-canvas text-muted px-2 py-0.5 rounded border border-line">Freelance</span>`;
-                let actionHtml = `<button onclick="requestClubAffiliation('${c.id}', '${esc(c.organization || c.full_name)}')" class="w-full min-h-[38px] rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Richiedi Affiliazione</button>`;
+                let actionHtml = `<button onclick="requestClubAffiliation(${jsq(c.id)}, ${jsq(c.organization || c.full_name)})" class="w-full min-h-[38px] rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Richiedi Affiliazione</button>`;
                 if (aff?.status === 'pending') { badge = `<span class="text-[11px] bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200">In attesa</span>`; actionHtml = `<button disabled class="w-full min-h-[38px] rounded-md bg-canvas text-muted text-xs font-semibold">Richiesta Inviata</button>`; }
-                else if (aff?.status === 'approved') { badge = `<span class="text-[11px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Affiliato</span>`; actionHtml = `<button onclick="leaveClubAffiliation('${aff.id}')" class="w-full min-h-[38px] rounded-md bg-white border border-line text-crimson text-xs font-semibold">Rimuovi</button>`; }
+                else if (aff?.status === 'approved') { badge = `<span class="text-[11px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Affiliato</span>`; actionHtml = `<button onclick="leaveClubAffiliation(${jsq(aff.id)})" class="w-full min-h-[38px] rounded-md bg-white border border-line text-crimson text-xs font-semibold">Rimuovi</button>`; }
                 else if (aff?.status === 'rejected') { badge = `<span class="text-[11px] bg-crimson-soft text-crimson px-2 py-0.5 rounded">Rifiutata</span>`; actionHtml = `<button disabled class="w-full min-h-[38px] rounded-md bg-canvas text-muted text-xs font-semibold">Non autorizzato</button>`; }
                 return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3">
                     <div>
@@ -896,7 +879,7 @@
         }
 
         async function requestClubAffiliation(clubId, clubName) {
-            const rec = { id: 'aff-' + Date.now(), scout_id: currentUser.id, club_id: clubId, scout_name: currentUser.full_name, scout_email: currentUser.email, club_name: clubName, status: 'pending' };
+            const rec = { id: newId('aff'), scout_id: currentUser.id, club_id: clubId, scout_name: currentUser.full_name, scout_email: currentUser.email, club_name: clubName, status: 'pending' };
             const { error } = await sb.from('scout_club_affiliations').insert(rec);
             if (error) return showToast(error.message, 'error');
             dbAffiliations.unshift(rec); renderScoutClubs(); showToast('Richiesta inviata!', 'success');
@@ -931,7 +914,7 @@
         async function submitScoutObservation() {
             if (!evaluatingPlayerId) return;
             const vals = Object.values(obsDraftScores), avg = +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
-            const obs = { id: 'obs-' + Date.now(), player_id: evaluatingPlayerId, observer_id: currentUser.id, observer_name: currentUser.full_name, observer_role: currentUser.organization || 'Scout', obs_date: document.getElementById('obs-date').value || todayISO(), location: document.getElementById('obs-location').value.trim() || '-', context: document.getElementById('obs-context').value, attitude: document.getElementById('obs-attitude').value, tips_variant: document.getElementById('obs-variant').value, scores: { ...obsDraftScores }, avg, outcome: document.getElementById('obs-outcome').value, notes: document.getElementById('obs-notes').value.trim() || 'Osservazione registrata.' };
+            const obs = { id: newId('obs'), player_id: evaluatingPlayerId, observer_id: currentUser.id, observer_name: currentUser.full_name, observer_role: currentUser.organization || 'Scout', obs_date: document.getElementById('obs-date').value || todayISO(), location: document.getElementById('obs-location').value.trim() || '-', context: document.getElementById('obs-context').value, attitude: document.getElementById('obs-attitude').value, tips_variant: document.getElementById('obs-variant').value, scores: { ...obsDraftScores }, avg, outcome: document.getElementById('obs-outcome').value, notes: document.getElementById('obs-notes').value.trim() || 'Osservazione registrata.' };
             const { error } = await sb.from('observations').insert(obs);
             if (error) return showToast(error.message, 'error');
             dbObservations.unshift(obs); closeEvaluateModal(); renderScoutPlayersList(); showToast(`Valutazione salvata (Media ${avg})!`, 'success');
@@ -943,20 +926,19 @@
         async function createNewPlayerByScout() {
             const name = document.getElementById('nps-name').value.trim(); if (!name) return showToast('Inserisci il nome.', 'error');
             if (!document.getElementById('nps-privacy').checked) return showToast('Dichiarazione privacy obbligatoria.', 'error');
-            const code = genCode('ATL');
-            const newP = { id: 'p-' + Date.now(), public_code: code, owner_user_id: null, club_owner_id: null, is_vivaio: false, name, dob: document.getElementById('nps-dob').value || null, role_category: document.getElementById('nps-role').value, role: document.getElementById('nps-role').value, club: document.getElementById('nps-club').value.trim(), residence: document.getElementById('nps-res').value.trim(), foot: 'Destro', privacy_consent: true, consent_type: 'scout_declared', consent_declared_by: currentUser.full_name, upcoming_matches: [] };
-            const { error } = await sb.from('players').insert(newP);
+            const newP = { id: newId('p'), owner_user_id: null, club_owner_id: null, is_vivaio: false, name, dob: document.getElementById('nps-dob').value || null, role_category: document.getElementById('nps-role').value, role: document.getElementById('nps-role').value, club: document.getElementById('nps-club').value.trim(), residence: document.getElementById('nps-res').value.trim(), foot: 'Destro', privacy_consent: true, consent_type: 'scout_declared', consent_declared_by: currentUser.full_name, upcoming_matches: [] };
+            const { data: created, error } = await sb.from('players').insert(newP).select().single();
             if (error) return showToast(error.message, 'error');
-            dbPlayers.unshift(newP); closeNewPlayerByScoutModal(); renderScoutPlayersList();
-            showToast(`Creato con ID Atleta: ${code} (puoi darlo alla famiglia)`, 'success');
-            openEvaluateModal(newP.id);
+            dbPlayers.unshift(created); closeNewPlayerByScoutModal(); renderScoutPlayersList();
+            showToast(`Creato con ID Atleta: ${created.public_code} (puoi darlo alla famiglia)`, 'success');
+            openEvaluateModal(created.id);
         }
 
         function renderScoutRequests() {
             const box = document.getElementById('scout-requests-list');
             const visibleReqs = dbRequests.filter(r => r.request_type !== 'vivaio' || dbAffiliations.some(a => a.scout_id === currentUser.id && a.club_id === r.club_id && a.status === 'approved'));
             if (!visibleReqs.length) return box.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessuna richiesta attiva.</div>';
-            box.innerHTML = visibleReqs.map(r => `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between mb-2"><span class="text-[11px] font-semibold px-2 py-0.5 rounded ${r.request_type === 'vivaio' ? 'bg-amber-50 text-amber-800' : 'bg-accent-soft text-accent'}">${r.request_type === 'vivaio' ? 'Talento Vivaio' : 'Esigenza Club'}</span><span class="text-xs text-muted">${esc(r.club_name)}</span></div><h3 class="font-semibold text-base text-ink">${esc(r.title)}</h3><p class="text-xs text-ink bg-canvas p-3 rounded-md border border-line mt-2">${esc(r.notes || '-')}</p></div>${r.player_id ? `<button onclick="openEvaluateModal('${r.player_id}')" class="w-full min-h-[40px] rounded-md bg-accent text-white text-xs font-semibold">Valuta questo Talento</button>` : ''}</div>`).join('');
+            box.innerHTML = visibleReqs.map(r => `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between mb-2"><span class="text-[11px] font-semibold px-2 py-0.5 rounded ${r.request_type === 'vivaio' ? 'bg-amber-50 text-amber-800' : 'bg-accent-soft text-accent'}">${r.request_type === 'vivaio' ? 'Talento Vivaio' : 'Esigenza Club'}</span><span class="text-xs text-muted">${esc(r.club_name)}</span></div><h3 class="font-semibold text-base text-ink">${esc(r.title)}</h3><p class="text-xs text-ink bg-canvas p-3 rounded-md border border-line mt-2">${esc(r.notes || '-')}</p></div>${r.player_id ? `<button onclick="openEvaluateModal(${jsq(r.player_id)})" class="w-full min-h-[40px] rounded-md bg-accent text-white text-xs font-semibold">Valuta questo Talento</button>` : ''}</div>`).join('');
         }
 
         async function saveOwnProfile(role) {
@@ -1000,7 +982,7 @@
             else { badge.classList.add('hidden'); dot.classList.add('hidden'); }
             const box = document.getElementById('club-affiliations-list');
             if (!mine.length) return box.innerHTML = '<p class="text-xs text-muted">Nessuna richiesta di affiliazione.</p>';
-            box.innerHTML = mine.map(a => `<div class="p-3.5 rounded-md bg-canvas border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs"><div><strong class="text-sm text-ink">${esc(a.scout_name)}</strong> <span class="text-muted">(${esc(a.scout_email || '-')})</span><div class="text-muted mt-0.5">Stato: <strong>${a.status === 'pending' ? 'In attesa' : (a.status === 'approved' ? 'Approvato — Vede il Vivaio' : 'Rifiutato')}</strong></div></div><div class="flex gap-2">${a.status !== 'approved' ? `<button onclick="respondClubAffiliation('${a.id}','approved')" class="min-h-[34px] px-3 rounded-md bg-emerald-700 text-white font-semibold">Accetta</button>` : ''}${a.status !== 'rejected' ? `<button onclick="respondClubAffiliation('${a.id}','rejected')" class="min-h-[34px] px-3 rounded-md bg-white border border-line text-crimson font-semibold">Rifiuta</button>` : ''}</div></div>`).join('');
+            box.innerHTML = mine.map(a => `<div class="p-3.5 rounded-md bg-canvas border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs"><div><strong class="text-sm text-ink">${esc(a.scout_name)}</strong> <span class="text-muted">(${esc(a.scout_email || '-')})</span><div class="text-muted mt-0.5">Stato: <strong>${a.status === 'pending' ? 'In attesa' : (a.status === 'approved' ? 'Approvato — Vede il Vivaio' : 'Rifiutato')}</strong></div></div><div class="flex gap-2">${a.status !== 'approved' ? `<button onclick="respondClubAffiliation(${jsq(a.id)},'approved')" class="min-h-[34px] px-3 rounded-md bg-emerald-700 text-white font-semibold">Accetta</button>` : ''}${a.status !== 'rejected' ? `<button onclick="respondClubAffiliation(${jsq(a.id)},'rejected')" class="min-h-[34px] px-3 rounded-md bg-white border border-line text-crimson font-semibold">Rifiuta</button>` : ''}</div></div>`).join('');
         }
 
         async function respondClubAffiliation(affId, newStatus) {
@@ -1024,29 +1006,29 @@
             });
             document.getElementById('club-showcase-grid').innerHTML = list.length ? list.map(p => {
                 const st = getPlayerStats(p.id);
-                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-4"><div><div class="flex items-start gap-3 mb-2"><img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" class="w-12 h-12 rounded-md object-cover border border-line flex-shrink-0"><div class="min-w-0 flex-1"><div class="flex justify-between"><span class="text-[11px] font-semibold bg-canvas px-2 py-0.5 rounded border border-line">${esc(p.role_category)}</span><span class="text-[10px] font-mono text-muted">${esc(p.public_code || '')}</span></div><h3 class="font-semibold text-base text-ink truncate mt-1">${esc(p.name)}</h3><p class="text-xs text-muted truncate">${esc(p.club || '-')} • ${p.dob ? p.dob.slice(0,4) : '-'}</p></div></div><div class="mt-2 p-2.5 bg-canvas rounded-md border border-line flex justify-between text-xs"><span><i class="fa-solid fa-star text-amber-500 mr-1"></i><strong>${st.avg.toFixed(1)}</strong> T.I.P.S.</span><span class="text-muted">${st.count} oss.</span></div></div><button onclick="openDetailModal('${p.id}')" class="w-full min-h-[40px] rounded-md bg-ink text-white text-xs font-semibold">Apri Dossier & PDF</button></div>`;
+                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-4"><div><div class="flex items-start gap-3 mb-2"><img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" class="w-12 h-12 rounded-md object-cover border border-line flex-shrink-0"><div class="min-w-0 flex-1"><div class="flex justify-between"><span class="text-[11px] font-semibold bg-canvas px-2 py-0.5 rounded border border-line">${esc(p.role_category)}</span><span class="text-[10px] font-mono text-muted">${esc(p.public_code || '')}</span></div><h3 class="font-semibold text-base text-ink truncate mt-1">${esc(p.name)}</h3><p class="text-xs text-muted truncate">${esc(p.club || '-')} • ${p.dob ? p.dob.slice(0,4) : '-'}</p></div></div><div class="mt-2 p-2.5 bg-canvas rounded-md border border-line flex justify-between text-xs"><span><i class="fa-solid fa-star text-amber-500 mr-1"></i><strong>${st.avg.toFixed(1)}</strong> T.I.P.S.</span><span class="text-muted">${st.count} oss.</span></div></div><button onclick="openDetailModal(${jsq(p.id)})" class="w-full min-h-[40px] rounded-md bg-ink text-white text-xs font-semibold">Apri Dossier & PDF</button></div>`;
             }).join('') : '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessun calciatore in vetrina.</div>';
         }
 
         async function addVivaioPlayer() {
             const name = document.getElementById('viv-name').value.trim(); if (!name) return showToast('Inserisci nome.', 'error');
-            const newP = { id: 'p-viv-' + Date.now(), public_code: genCode('ATL'), owner_user_id: null, club_owner_id: currentUser.id, is_vivaio: true, name, dob: document.getElementById('viv-dob').value || null, residence: currentUser.city || '', club: currentUser.organization || currentUser.full_name, league: document.getElementById('viv-league').value.trim(), role_category: document.getElementById('viv-role').value, role: document.getElementById('viv-role').value, foot: 'Destro', privacy_consent: true, consent_type: 'club_vivaio', upcoming_matches: [] };
-            const { error } = await sb.from('players').insert(newP);
+            const newP = { id: newId('p-viv'), owner_user_id: null, club_owner_id: currentUser.id, is_vivaio: true, name, dob: document.getElementById('viv-dob').value || null, residence: currentUser.city || '', club: currentUser.organization || currentUser.full_name, league: document.getElementById('viv-league').value.trim(), role_category: document.getElementById('viv-role').value, role: document.getElementById('viv-role').value, foot: 'Destro', privacy_consent: true, consent_type: 'club_vivaio', upcoming_matches: [] };
+            const { data: created, error } = await sb.from('players').insert(newP).select().single();
             if (error) return showToast(error.message, 'error');
-            dbPlayers.unshift(newP); document.getElementById('viv-name').value = ''; renderClubVivaio(); showToast(`Aggiunto (${newP.public_code})!`, 'success');
+            dbPlayers.unshift(created); document.getElementById('viv-name').value = ''; renderClubVivaio(); showToast(`Aggiunto (${created.public_code})!`, 'success');
         }
 
         function renderClubVivaio() {
             const mine = dbPlayers.filter(p => p.is_vivaio && p.club_owner_id === currentUser.id);
             document.getElementById('club-vivaio-grid').innerHTML = mine.length ? mine.map(p => {
                 const st = getPlayerStats(p.id), reqSent = dbRequests.some(r => r.player_id === p.id);
-                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between"><span class="text-[11px] font-semibold bg-amber-50 text-amber-800 px-2 py-0.5 rounded">Vivaio</span><span class="text-[10px] font-mono text-muted">${esc(p.public_code || '')}</span></div><h3 class="font-semibold text-base mt-2">${esc(p.name)}</h3><p class="text-xs text-muted">${esc(p.role_category)} • ${p.dob ? p.dob.slice(0,4) : '-'}</p><div class="mt-3 p-2 bg-canvas rounded border border-line text-xs">Media: <strong>${st.avg ?? 'In attesa'}</strong> (${st.count} oss.)</div></div><div class="flex gap-2"><button onclick="openDetailModal('${p.id}')" class="flex-1 min-h-[38px] rounded-md bg-canvas border border-line text-xs font-semibold">Voti / PDF</button><button onclick="requestScoutForVivaio('${p.id}')" class="flex-1 min-h-[38px] rounded-md ${reqSent ? 'bg-emerald-700' : 'bg-accent'} text-white text-xs font-semibold">${reqSent ? 'Inviata' : 'Chiedi a Scout'}</button></div></div>`;
+                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between"><span class="text-[11px] font-semibold bg-amber-50 text-amber-800 px-2 py-0.5 rounded">Vivaio</span><span class="text-[10px] font-mono text-muted">${esc(p.public_code || '')}</span></div><h3 class="font-semibold text-base mt-2">${esc(p.name)}</h3><p class="text-xs text-muted">${esc(p.role_category)} • ${p.dob ? p.dob.slice(0,4) : '-'}</p><div class="mt-3 p-2 bg-canvas rounded border border-line text-xs">Media: <strong>${st.avg ?? 'In attesa'}</strong> (${st.count} oss.)</div></div><div class="flex gap-2"><button onclick="openDetailModal(${jsq(p.id)})" class="flex-1 min-h-[38px] rounded-md bg-canvas border border-line text-xs font-semibold">Voti / PDF</button><button onclick="requestScoutForVivaio(${jsq(p.id)})" class="flex-1 min-h-[38px] rounded-md ${reqSent ? 'bg-emerald-700' : 'bg-accent'} text-white text-xs font-semibold">${reqSent ? 'Inviata' : 'Chiedi a Scout'}</button></div></div>`;
             }).join('') : '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessun talento nel Vivaio.</div>';
         }
 
         async function requestScoutForVivaio(pid) {
             const p = dbPlayers.find(x => x.id === pid); if (!p) return;
-            const req = { id: 'req-' + Date.now(), club_id: currentUser.id, club_name: currentUser.organization || currentUser.full_name, request_type: 'vivaio', player_id: p.id, title: `Valutazione Vivaio: ${p.name}`, role_needed: p.role_category, birth_year_range: p.dob ? p.dob.slice(0,4) : '-', notes: 'Richiesta valutazione tecnica T.I.P.S.', status: 'open' };
+            const req = { id: newId('req'), club_id: currentUser.id, club_name: currentUser.organization || currentUser.full_name, request_type: 'vivaio', player_id: p.id, title: `Valutazione Vivaio: ${p.name}`, role_needed: p.role_category, birth_year_range: p.dob ? p.dob.slice(0,4) : '-', notes: 'Richiesta valutazione tecnica T.I.P.S.', status: 'open' };
             const { error } = await sb.from('scout_requests').insert(req);
             if (error) return showToast(error.message, 'error');
             dbRequests.unshift(req); renderClubVivaio(); renderClubMyRequests(); showToast('Richiesta inviata!', 'success');
@@ -1054,7 +1036,7 @@
 
         async function createGeneralClubRequest() {
             const title = document.getElementById('creq-title').value.trim(); if (!title) return showToast('Inserisci un titolo.', 'error');
-            const req = { id: 'req-' + Date.now(), club_id: currentUser.id, club_name: currentUser.organization || currentUser.full_name, request_type: 'general', player_id: null, title, role_needed: document.getElementById('creq-role').value, birth_year_range: document.getElementById('creq-years').value.trim() || '-', notes: document.getElementById('creq-notes').value.trim() || '-', status: 'open' };
+            const req = { id: newId('req'), club_id: currentUser.id, club_name: currentUser.organization || currentUser.full_name, request_type: 'general', player_id: null, title, role_needed: document.getElementById('creq-role').value, birth_year_range: document.getElementById('creq-years').value.trim() || '-', notes: document.getElementById('creq-notes').value.trim() || '-', status: 'open' };
             const { error } = await sb.from('scout_requests').insert(req);
             if (error) return showToast(error.message, 'error');
             dbRequests.unshift(req); document.getElementById('creq-title').value = ''; document.getElementById('creq-notes').value = ''; renderClubMyRequests(); showToast('Richiesta pubblicata!', 'success');
@@ -1081,10 +1063,10 @@
             const box = document.getElementById('admin-content-container');
 
             if (tab === 'players') {
-                box.innerHTML = `<table class="w-full text-left text-xs sm:text-sm min-w-[680px]"><thead class="bg-canvas border-b border-line text-muted"><tr><th class="p-3">ID Atleta</th><th class="p-3">Nome</th><th class="p-3">Club</th><th class="p-3">Ruolo</th><th class="p-3">Media</th><th class="p-3 text-right">Azioni</th></tr></thead><tbody class="divide-y divide-line">${dbPlayers.map(p => { const st = getPlayerStats(p.id); return `<tr><td class="p-3 font-mono font-bold text-xs">${esc(p.public_code||'-')}</td><td class="p-3 font-semibold">${esc(p.name)}</td><td class="p-3">${esc(p.club||'-')}</td><td class="p-3">${esc(p.role_category)}</td><td class="p-3 font-bold text-accent">${st.avg ?? '—'} (${st.count})</td><td class="p-3 text-right space-x-2"><button onclick="openDetailModal('${p.id}')" class="text-accent font-semibold">Vedi</button><button onclick="openAdminEdit('player','${p.id}')" class="underline font-semibold">Modifica Tutto</button></td></tr>`; }).join('')}</tbody></table>`;
+                box.innerHTML = `<table class="w-full text-left text-xs sm:text-sm min-w-[680px]"><thead class="bg-canvas border-b border-line text-muted"><tr><th class="p-3">ID Atleta</th><th class="p-3">Nome</th><th class="p-3">Club</th><th class="p-3">Ruolo</th><th class="p-3">Media</th><th class="p-3 text-right">Azioni</th></tr></thead><tbody class="divide-y divide-line">${dbPlayers.map(p => { const st = getPlayerStats(p.id); return `<tr><td class="p-3 font-mono font-bold text-xs">${esc(p.public_code||'-')}</td><td class="p-3 font-semibold">${esc(p.name)}</td><td class="p-3">${esc(p.club||'-')}</td><td class="p-3">${esc(p.role_category)}</td><td class="p-3 font-bold text-accent">${st.avg ?? '—'} (${st.count})</td><td class="p-3 text-right space-x-2"><button onclick="openDetailModal(${jsq(p.id)})" class="text-accent font-semibold">Vedi</button><button onclick="openAdminEdit('player',${jsq(p.id)})" class="underline font-semibold">Modifica Tutto</button></td></tr>`; }).join('')}</tbody></table>`;
             } else if (tab === 'scouts' || tab === 'clubs') {
                 const list = dbProfiles.filter(u => u.role === (tab === 'scouts' ? 'scout' : 'club'));
-                box.innerHTML = `<table class="w-full text-left text-xs sm:text-sm min-w-[680px]"><thead class="bg-canvas border-b border-line text-muted"><tr><th class="p-3">ID</th><th class="p-3">Nome</th><th class="p-3">Org / Qualifica</th><th class="p-3">Tel</th><th class="p-3">Email</th><th class="p-3 text-right">Azioni</th></tr></thead><tbody class="divide-y divide-line">${list.map(u => `<tr><td class="p-3 font-mono font-bold text-xs">${esc(u.public_code||'-')}</td><td class="p-3 font-semibold">${esc(u.full_name)}</td><td class="p-3">${esc(u.organization||'-')}</td><td class="p-3">${esc(u.phone||'-')}</td><td class="p-3 text-muted">${esc(u.email||'-')}</td><td class="p-3 text-right"><button onclick="openAdminEdit('profile','${u.id}')" class="text-accent underline font-semibold">Modifica Tutto</button></td></tr>`).join('')}</tbody></table>`;
+                box.innerHTML = `<table class="w-full text-left text-xs sm:text-sm min-w-[680px]"><thead class="bg-canvas border-b border-line text-muted"><tr><th class="p-3">ID</th><th class="p-3">Nome</th><th class="p-3">Org / Qualifica</th><th class="p-3">Tel</th><th class="p-3">Email</th><th class="p-3 text-right">Azioni</th></tr></thead><tbody class="divide-y divide-line">${list.map(u => `<tr><td class="p-3 font-mono font-bold text-xs">${esc(u.public_code||'-')}</td><td class="p-3 font-semibold">${esc(u.full_name)}</td><td class="p-3">${esc(u.organization||'-')}</td><td class="p-3">${esc(u.phone||'-')}</td><td class="p-3 text-muted">${esc(u.email||'-')}</td><td class="p-3 text-right"><button onclick="openAdminEdit('profile',${jsq(u.id)})" class="text-accent underline font-semibold">Modifica Tutto</button></td></tr>`).join('')}</tbody></table>`;
             } else {
                 const scouts = dbProfiles.filter(u => u.role === 'scout'), clubs = dbProfiles.filter(u => u.role === 'club');
                 box.innerHTML = `
@@ -1092,12 +1074,12 @@
                         <div class="p-4 bg-canvas rounded-md border border-line space-y-3">
                             <h3 class="font-bold text-sm text-ink">Assegna Direttamente uno Scout a un Club</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                                <select id="adm-aff-scout" class="min-h-[40px] px-3 bg-white border border-line rounded-md text-sm">${scouts.map(s=>`<option value="${s.id}">${esc(s.full_name)} (${esc(s.public_code||'-')})</option>`).join('')}</select>
-                                <select id="adm-aff-club" class="min-h-[40px] px-3 bg-white border border-line rounded-md text-sm">${clubs.map(c=>`<option value="${c.id}">${esc(c.organization||c.full_name)} (${esc(c.public_code||'-')})</option>`).join('')}</select>
+                                <select id="adm-aff-scout" class="min-h-[40px] px-3 bg-white border border-line rounded-md text-sm">${scouts.map(s=>`<option value="${esc(s.id)}">${esc(s.full_name)} (${esc(s.public_code||'-')})</option>`).join('')}</select>
+                                <select id="adm-aff-club" class="min-h-[40px] px-3 bg-white border border-line rounded-md text-sm">${clubs.map(c=>`<option value="${esc(c.id)}">${esc(c.organization||c.full_name)} (${esc(c.public_code||'-')})</option>`).join('')}</select>
                                 <button onclick="adminAssignScoutToClub()" class="min-h-[40px] rounded-md bg-accent text-white text-xs font-semibold">Assegna (Approvato)</button>
                             </div>
                         </div>
-                        <div class="space-y-2">${dbAffiliations.length ? dbAffiliations.map(a=>`<div class="p-3 bg-white border border-line rounded-md flex items-center justify-between text-xs"><div><strong>${esc(a.scout_name)}</strong> → <strong>${esc(a.club_name)}</strong> <span class="ml-2 px-2 py-0.5 rounded bg-canvas border border-line">${esc(a.status)}</span></div><button onclick="adminDeleteAffiliation('${a.id}')" class="text-crimson font-semibold">Rimuovi</button></div>`).join('') : '<p class="text-xs text-muted">Nessuna affiliazione presente.</p>'}</div>
+                        <div class="space-y-2">${dbAffiliations.length ? dbAffiliations.map(a=>`<div class="p-3 bg-white border border-line rounded-md flex items-center justify-between text-xs"><div><strong>${esc(a.scout_name)}</strong> → <strong>${esc(a.club_name)}</strong> <span class="ml-2 px-2 py-0.5 rounded bg-canvas border border-line">${esc(a.status)}</span></div><button onclick="adminDeleteAffiliation(${jsq(a.id)})" class="text-crimson font-semibold">Rimuovi</button></div>`).join('') : '<p class="text-xs text-muted">Nessuna affiliazione presente.</p>'}</div>
                     </div>`;
             }
         }
@@ -1106,7 +1088,7 @@
             const sid = document.getElementById('adm-aff-scout').value, cid = document.getElementById('adm-aff-club').value;
             if (!sid || !cid) return showToast('Seleziona sia uno scout che un club.', 'error');
             const s = dbProfiles.find(x => x.id === sid), c = dbProfiles.find(x => x.id === cid);
-            const rec = { id: 'aff-' + Date.now(), scout_id: sid, club_id: cid, scout_name: s.full_name, scout_email: s.email, club_name: c.organization || c.full_name, status: 'approved' };
+            const rec = { id: newId('aff'), scout_id: sid, club_id: cid, scout_name: s.full_name, scout_email: s.email, club_name: c.organization || c.full_name, status: 'approved' };
             const { error } = await sb.from('scout_club_affiliations').upsert(rec, { onConflict: 'scout_id,club_id' });
             if (error) return showToast(error.message, 'error');
             await syncAllFromCloud(); setAdminTab('affiliations'); showToast('Scout assegnato al Club!', 'success');
@@ -1233,7 +1215,7 @@
             else mBox.classList.add('hidden');
 
             document.getElementById('dm-reviews-list').innerHTML = st.list.length
-                ? st.list.map(r => `<div class="p-4 bg-canvas/60 rounded-md border border-line space-y-2"><div class="flex justify-between text-xs"><strong>${esc(r.observer_name)} (${esc(r.observer_role||'Scout')})</strong><span class="font-bold text-accent">Media ${Number(r.avg).toFixed(1)}</span></div><div class="flex flex-wrap gap-1.5">${Object.entries(r.scores||{}).map(([k,v])=>`<span class="px-2 py-0.5 bg-white border border-line rounded text-[11px]">${esc(k)}: <strong>${v}</strong></span>`).join('')}</div><p class="text-xs bg-white p-3 rounded border border-line">${esc(r.notes)}</p><div class="flex justify-between text-[11px] text-muted"><span>${formatDateIT(r.obs_date)} • ${esc(r.location)} (${esc(r.context)})</span><strong>${esc(r.outcome)}</strong></div></div>`).join('')
+                ? st.list.map(r => `<div class="p-4 bg-canvas/60 rounded-md border border-line space-y-2"><div class="flex justify-between text-xs"><strong>${esc(r.observer_name)} (${esc(r.observer_role||'Scout')})</strong><span class="font-bold text-accent">Media ${Number(r.avg).toFixed(1)}</span></div><div class="flex flex-wrap gap-1.5">${Object.entries(r.scores||{}).map(([k,v])=>`<span class="px-2 py-0.5 bg-white border border-line rounded text-[11px]">${esc(k)}: <strong>${esc(v)}</strong></span>`).join('')}</div><p class="text-xs bg-white p-3 rounded border border-line">${esc(r.notes)}</p><div class="flex justify-between text-[11px] text-muted"><span>${formatDateIT(r.obs_date)} • ${esc(r.location)} (${esc(r.context)})</span><strong>${esc(r.outcome)}</strong></div></div>`).join('')
                 : '<p class="text-sm text-muted text-center py-4">Nessuna osservazione registrata.</p>';
             document.getElementById('detail-modal').classList.remove('hidden');
         }
@@ -1242,7 +1224,7 @@
         function exportDetailPDF() {
             const p = dbPlayers.find(x => x.id === currentDetailPlayerId); if (!p) return;
             const st = getPlayerStats(p.id), age = calculateAge(p.dob);
-            const clubLogo = (currentUser?.role === 'club' && currentUser?.avatar_url) ? `<img src="${currentUser.avatar_url}" style="height:44px;width:44px;object-fit:contain;border-radius:6px;border:1px solid #E5E5EA;padding:2px;">` : '';
+            const clubLogo = (currentUser?.role === 'club' && currentUser?.avatar_url) ? `<img src="${esc(currentUser.avatar_url)}" style="height:44px;width:44px;object-fit:contain;border-radius:6px;border:1px solid #E5E5EA;padding:2px;">` : '';
             const verdictStr = Object.entries(st.verdicts).map(([k, v]) => `${v} ${k}`).join(' • ') || 'Nessun esito';
 
             const barsPdf = Object.entries(st.keyAvgs).length === 0 ? '<div style="font-size:10px;color:#6E6E73;">Nessun punteggio disponibile.</div>' : Object.entries(st.keyAvgs).map(([k, v]) => `<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;"><span style="font-weight:600;color:#1D1D1F;">${esc(k)} — ${esc(TIPS_FULL_LABELS[k] || k)}</span><span style="font-weight:700;color:#0071E3;">${v.toFixed(1)} / 10</span></div><div style="width:100%;height:6px;background:#E5E5EA;border-radius:3px;overflow:hidden;"><div style="width:${Math.min(100, v * 10)}%;height:100%;background:#0071E3;"></div></div></div>`).join('');
