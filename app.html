@@ -111,7 +111,7 @@
                         <div><label class="text-xs font-semibold block mb-1">Data di Nascita *</label><input type="date" id="reg-p-dob" value="2013-01-01" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm"></div>
                         <div><label class="text-xs font-semibold block mb-1">Città *</label><input type="text" id="reg-p-city" placeholder="Piacenza" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm"></div>
                     </div>
-                    <label class="flex items-start gap-2.5 cursor-pointer"><input type="checkbox" id="reg-p-privacy" class="mt-0.5 w-4 h-4 accent-accent"><span class="text-xs text-ink">Acconsento al trattamento dei dati sportivi (GDPR).</span></label>
+                    <label class="flex items-start gap-2.5 cursor-pointer"><input type="checkbox" id="reg-p-privacy" class="mt-0.5 w-4 h-4 accent-accent"><span class="text-xs text-ink">Acconsento al trattamento dei dati sportivi. Leggi l'<button type="button" onclick="openPrivacyModal()" class="underline font-semibold">informativa privacy</button>.</span></label>
                 </div>
                 <div id="reg-fields-scout" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-canvas/50 rounded-md border border-line">
                     <div><label class="text-xs font-semibold block mb-1">Qualifica / Licenza *</label><input type="text" id="reg-s-org" placeholder="Es. Osservatore UEFA" class="w-full min-h-[40px] px-2.5 bg-white border border-line rounded-md text-sm"></div>
@@ -242,16 +242,20 @@
                     <div><label class="text-xs font-semibold block mb-1">Altezza (cm)</label><input type="number" id="pp-height" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                     <div><label class="text-xs font-semibold block mb-1">Peso (kg)</label><input type="number" id="pp-weight" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm"></div>
                 </div>
-                <div class="p-4 rounded-md bg-emerald-50/70 border border-emerald-200 space-y-3">
-                    <input id="pp-guardian" placeholder="Nome Genitore / Tutore (obbligatorio se minorenne)" class="w-full min-h-[42px] px-3 bg-white border border-emerald-300 rounded-md text-sm">
-                    <label class="flex items-start gap-2.5 cursor-pointer">
-                        <input type="checkbox" id="pp-consent" class="mt-1 w-4 h-4 accent-emerald-700">
-                        <span class="text-xs text-emerald-950"><strong>Consenso Privacy Attivo:</strong> autorizzo Scout e Società registrate a visionare questa scheda.</span>
-                    </label>
-                </div>
+                <div id="pp-consent-box"></div>
+                <div id="pp-certs" class="space-y-1.5"></div>
                 <div class="flex justify-end">
                     <button onclick="savePlayerSelfProfile()" class="min-h-[44px] px-6 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold">Salva Scheda</button>
                 </div>
+            </div>
+
+            <!-- INFORTUNI -->
+            <div class="glass rounded-2xl p-5 sm:p-6 border border-line space-y-3">
+                <div class="pb-3 border-b border-line">
+                    <h2 class="font-semibold text-base text-ink"><i class="fa-solid fa-bandage text-accent mr-1.5"></i>Infortuni e Condizione Fisica</h2>
+                    <p class="text-xs text-muted mt-0.5">Tocca la zona del corpo per segnalare un infortunio. Visibile a scout e società solo con il tuo consenso ai dati sulla salute.</p>
+                </div>
+                <div id="pp-inj"></div>
             </div>
         </main>
 
@@ -372,6 +376,7 @@
                         <input id="viv-league" placeholder="Squadra (es. U14)" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
                         <button onclick="addVivaioPlayer()" class="min-h-[42px] rounded-md bg-ink text-white text-sm font-semibold">+ Aggiungi</button>
                     </div>
+                    <div id="viv-consent-box"></div>
                 </div>
                 <div id="club-vivaio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
@@ -436,11 +441,12 @@
                 <div class="glass rounded-2xl p-4 border border-line"><div class="text-xs text-muted">Scout</div><div id="adm-kpi-scouts" class="text-2xl font-bold text-ink mt-1">0</div></div>
                 <div class="glass rounded-2xl p-4 border border-line"><div class="text-xs text-muted">Società</div><div id="adm-kpi-clubs" class="text-2xl font-bold text-ink mt-1">0</div></div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 glass p-1.5 rounded-2xl">
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 glass p-1.5 rounded-2xl">
                 <button onclick="setAdminTab('players')" id="admtab-players" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on">Calciatori</button>
                 <button onclick="setAdminTab('scouts')" id="admtab-scouts" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Scout</button>
                 <button onclick="setAdminTab('clubs')" id="admtab-clubs" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Società</button>
                 <button onclick="setAdminTab('affiliations')" id="admtab-affiliations" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Assegna Scout ↔ Club</button>
+                <button onclick="setAdminTab('privacy')" id="admtab-privacy" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off"><i class="fa-solid fa-shield-halved mr-1"></i>Privacy / GDPR</button>
             </div>
             <div id="admin-content-container" class="glass rounded-2xl border border-line overflow-x-auto"></div>
         </main>
@@ -464,6 +470,8 @@
                     <div><label class="text-xs font-semibold block mb-1">Esito</label><select id="obs-outcome" class="w-full min-h-[40px] px-3 bg-canvas/40 border border-line rounded-md text-sm font-semibold"><option>Da prendere</option><option selected>Da rivedere e monitorare</option><option>Non idoneo</option></select></div>
                     <div><label class="text-xs font-semibold block mb-1">Atteggiamento</label><select id="obs-attitude" class="w-full min-h-[40px] px-3 bg-canvas/40 border border-line rounded-md text-sm"><option>Ottimo / Leader</option><option selected>Positivo</option><option>Discreto</option><option>Da migliorare</option></select></div>
                 </div>
+                <div class="space-y-2"><div class="text-xs font-semibold text-ink"><i class="fa-solid fa-chess-board text-accent mr-1.5"></i>Lavagna: dove è stato più presente</div><div id="ev-pitch"></div></div>
+                <div class="space-y-2"><div class="text-xs font-semibold text-ink"><i class="fa-solid fa-bandage text-accent mr-1.5"></i>Infortuni (opzionale)</div><div id="ev-inj"></div></div>
                 <textarea id="obs-notes" rows="3" placeholder="Relazione tecnica (Vedere • Capire • Scegliere • Eseguire)..." class="w-full p-3 bg-canvas/40 border border-line rounded-md text-sm"></textarea>
                 <button onclick="submitScoutObservation()" class="w-full min-h-[44px] rounded-md bg-accent hover:bg-accent-hover text-white font-semibold text-sm">Salva e Firma Valutazione</button>
             </div>
@@ -483,10 +491,7 @@
                         <input id="nps-club" placeholder="Club attuale" class="min-h-[40px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
                         <input id="nps-res" placeholder="Città" class="min-h-[40px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
                     </div>
-                    <label class="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-md cursor-pointer">
-                        <input type="checkbox" id="nps-privacy" class="mt-0.5 w-4 h-4 accent-accent">
-                        <span class="text-xs text-ink"><strong>Dichiarazione Privacy:</strong> Dichiaro di aver ottenuto il consenso dal calciatore o dalla famiglia.</span>
-                    </label>
+                    <div id="nps-consent-box"></div>
                 </div>
                 <button onclick="createNewPlayerByScout()" class="w-full min-h-[44px] rounded-md bg-accent text-white text-sm font-semibold">Crea e Genera ID Atleta</button>
             </div>
@@ -510,6 +515,7 @@
                 </div>
                 <div id="dm-stats-bar" class="p-4 bg-white/50 rounded-2xl border border-line"></div>
                 <div id="dm-matches-box" class="hidden p-4 bg-accent-soft/50 rounded-md border border-emerald-200 space-y-1.5"></div>
+                <div id="dm-extra"></div>
                 <div id="dm-reviews-list" class="space-y-3"></div>
             </div>
         </div>
@@ -585,7 +591,7 @@
         let evaluatingPlayerId = null, obsDraftScores = {}, currentDetailPlayerId = null;
         let adminTab = 'players', adminEditContext = null, adminDraftPhoto = null, adminDraftMatches = [];
         let draftPlayerPhoto = null, draftAvatarPhoto = null;
-        let dbProfiles = [], dbPlayers = [], dbObservations = [], dbRequests = [], dbClubs = [], dbAffiliations = [];
+        let dbProfiles = [], dbPlayers = [], dbObservations = [], dbRequests = [], dbClubs = [], dbAffiliations = [], dbInjuries = [];
 
         // Gli ID e i codici pubblici sono generati dal database (trigger). Qui solo ID locali casuali.
         function newId(prefix) { return prefix + '-' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2, 10)); }
@@ -713,12 +719,14 @@
         }
 
         async function syncAllFromCloud() {
-            const [pRes, oRes, rRes, aRes] = await Promise.all([
+            const [pRes, oRes, rRes, aRes, iRes] = await Promise.all([
                 sb.from('players').select('*'),
                 sb.from('observations').select('*').order('obs_date', { ascending: false }),
                 sb.from('scout_requests').select('*').order('created_at', { ascending: false }),
-                sb.from('scout_club_affiliations').select('*').order('created_at', { ascending: false })
+                sb.from('scout_club_affiliations').select('*').order('created_at', { ascending: false }),
+                sb.from('injuries').select('*').order('created_at', { ascending: false })
             ]);
+            dbInjuries = iRes.data || [];
             dbPlayers = pRes.data || []; dbObservations = oRes.data || []; dbRequests = rRes.data || []; dbAffiliations = aRes.data || [];
             if (currentUser.role === 'scout') { const cRes = await sb.from('profiles').select('*').eq('role', 'club'); dbClubs = cRes.data || []; }
             if (currentUser.role === 'admin') { const profRes = await sb.from('profiles').select('*'); dbProfiles = profRes.data || []; }
@@ -779,9 +787,11 @@
                 document.getElementById('pp-foot').value = p.foot || 'Destro';
                 document.getElementById('pp-height').value = p.height || '';
                 document.getElementById('pp-weight').value = p.weight || '';
-                document.getElementById('pp-guardian').value = p.guardian_name || '';
-                document.getElementById('pp-consent').checked = !!p.privacy_consent;
             }
+            document.getElementById('pp-consent-box').innerHTML = consentBoxHtml('pp', 'player');
+            fillConsentBox('pp', p);
+            renderMyCerts(p ? p.id : null, 'pp-certs');
+            mountPlayerInjuries();
             renderPlayerMatchesList();
             let pings = [];
             if (p) { const { data } = await sb.rpc('get_my_player_observation_pings', { p_player_id: p.id }); pings = data || []; }
@@ -804,6 +814,9 @@
         async function savePlayerSelfProfile() {
             const name = document.getElementById('pp-name').value.trim(); if (!name) return showToast('Inserisci il nome.', 'error');
             const existing = getMyPlayerRecord();
+            const cons = readConsentBox('pp', 'player', document.getElementById('pp-dob').value);
+            if (cons.error) return showToast(cons.error, 'error');
+            if (calculateAge(document.getElementById('pp-dob').value) !== '' && Number(calculateAge(document.getElementById('pp-dob').value)) < 18 && cons.data.consent_relation === 'atleta') return showToast('Per un minorenne il consenso deve essere dato da un genitore o tutore.', 'error');
             const record = {
                 id: existing ? existing.id : ('p-' + currentUser.id),
                 owner_user_id: currentUser.id, club_owner_id: null, is_vivaio: false,
@@ -813,8 +826,7 @@
                 league: document.getElementById('pp-league').value.trim(),
                 role_category: document.getElementById('pp-role-cat').value, role: document.getElementById('pp-role-cat').value,
                 foot: document.getElementById('pp-foot').value, height: document.getElementById('pp-height').value, weight: document.getElementById('pp-weight').value,
-                guardian_name: document.getElementById('pp-guardian').value.trim(),
-                privacy_consent: document.getElementById('pp-consent').checked, consent_type: 'parent',
+                ...cons.data,
                 photo: draftPlayerPhoto || existing?.photo || null,
                 upcoming_matches: existing?.upcoming_matches || []
             };
@@ -968,6 +980,7 @@
             document.getElementById('eval-player-meta').textContent = `${p.role_category} • ${p.club || '-'} • Anno ${p.dob ? p.dob.slice(0,4) : '-'}`;
             document.getElementById('obs-notes').value = '';
             renderScoutTipsSliders();
+            initEvalExtras(p);
             document.getElementById('evaluate-modal').classList.remove('hidden');
         }
         function closeEvaluateModal() { document.getElementById('evaluate-modal').classList.add('hidden'); }
@@ -986,18 +999,22 @@
             if (!evaluatingPlayerId) return;
             const vals = Object.values(obsDraftScores), avg = +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
             const obs = { id: newId('obs'), player_id: evaluatingPlayerId, observer_id: currentUser.id, observer_name: currentUser.full_name, observer_role: currentUser.organization || 'Scout', obs_date: document.getElementById('obs-date').value || todayISO(), location: document.getElementById('obs-location').value.trim() || '-', context: document.getElementById('obs-context').value, attitude: document.getElementById('obs-attitude').value, tips_variant: document.getElementById('obs-variant').value, scores: { ...obsDraftScores }, avg, outcome: document.getElementById('obs-outcome').value, notes: document.getElementById('obs-notes').value.trim() || 'Osservazione registrata.' };
+            obs.pitch_heatmap = getEvalHeat();
             const { error } = await sb.from('observations').insert(obs);
             if (error) return showToast(error.message, 'error');
+            await saveInjuryDrafts(obs.id);
             dbObservations.unshift(obs); closeEvaluateModal(); renderScoutPlayersList(); showToast(`Valutazione salvata (Media ${avg})!`, 'success');
         }
 
-        function openNewPlayerByScoutModal() { document.getElementById('nps-name').value = ''; document.getElementById('nps-privacy').checked = false; document.getElementById('new-player-scout-modal').classList.remove('hidden'); }
+        function openNewPlayerByScoutModal() { document.getElementById('nps-name').value = ''; document.getElementById('nps-consent-box').innerHTML = consentBoxHtml('nps', 'scout'); document.getElementById('new-player-scout-modal').classList.remove('hidden'); }
         function closeNewPlayerByScoutModal() { document.getElementById('new-player-scout-modal').classList.add('hidden'); }
 
         async function createNewPlayerByScout() {
             const name = document.getElementById('nps-name').value.trim(); if (!name) return showToast('Inserisci il nome.', 'error');
-            if (!document.getElementById('nps-privacy').checked) return showToast('Dichiarazione privacy obbligatoria.', 'error');
-            const newP = { id: newId('p'), owner_user_id: null, club_owner_id: null, is_vivaio: false, name, dob: document.getElementById('nps-dob').value || null, role_category: document.getElementById('nps-role').value, role: document.getElementById('nps-role').value, club: document.getElementById('nps-club').value.trim(), residence: document.getElementById('nps-res').value.trim(), foot: 'Destro', privacy_consent: true, consent_type: 'scout_declared', consent_declared_by: currentUser.full_name, upcoming_matches: [] };
+            const cons = readConsentBox('nps', 'scout', document.getElementById('nps-dob').value);
+            if (cons.error) return showToast(cons.error, 'error');
+            if (!cons.data.privacy_consent) return showToast('Dichiarazione di consenso obbligatoria.', 'error');
+            const newP = { id: newId('p'), owner_user_id: null, club_owner_id: null, is_vivaio: false, name, dob: document.getElementById('nps-dob').value || null, role_category: document.getElementById('nps-role').value, role: document.getElementById('nps-role').value, club: document.getElementById('nps-club').value.trim(), residence: document.getElementById('nps-res').value.trim(), foot: 'Destro', ...cons.data, consent_declared_by: currentUser.full_name, upcoming_matches: [] };
             const { data: created, error } = await sb.from('players').insert(newP).select().single();
             if (error) return showToast(error.message, 'error');
             dbPlayers.unshift(created); closeNewPlayerByScoutModal(); renderScoutPlayersList();
@@ -1035,6 +1052,7 @@
             document.getElementById('cp-phone').value = currentUser.phone || '';
             document.getElementById('cp-city').value = currentUser.city || '';
             document.getElementById('cp-category').value = currentUser.category || '';
+            document.getElementById('viv-consent-box').innerHTML = consentBoxHtml('viv', 'club');
             setClubTab('showcase'); renderClubShowcase(); renderClubVivaio(); renderClubAffiliations(); renderClubMyRequests();
         }
 
@@ -1100,10 +1118,13 @@
 
         async function addVivaioPlayer() {
             const name = document.getElementById('viv-name').value.trim(); if (!name) return showToast('Inserisci nome.', 'error');
-            const newP = { id: newId('p-viv'), owner_user_id: null, club_owner_id: currentUser.id, is_vivaio: true, name, dob: document.getElementById('viv-dob').value || null, residence: currentUser.city || '', club: currentUser.organization || currentUser.full_name, league: document.getElementById('viv-league').value.trim(), role_category: document.getElementById('viv-role').value, role: document.getElementById('viv-role').value, foot: 'Destro', privacy_consent: true, consent_type: 'club_vivaio', upcoming_matches: [] };
+            const cons = readConsentBox('viv', 'club', null);
+            if (cons.error) return showToast(cons.error, 'error');
+            if (!cons.data.privacy_consent) return showToast('Per inserire un atleta devi dichiarare di aver raccolto il consenso.', 'error');
+            const newP = { id: newId('p-viv'), owner_user_id: null, club_owner_id: currentUser.id, is_vivaio: true, name, dob: document.getElementById('viv-dob').value || null, residence: currentUser.city || '', club: currentUser.organization || currentUser.full_name, league: document.getElementById('viv-league').value.trim(), role_category: document.getElementById('viv-role').value, role: document.getElementById('viv-role').value, foot: 'Destro', ...cons.data, upcoming_matches: [] };
             const { data: created, error } = await sb.from('players').insert(newP).select().single();
             if (error) return showToast(error.message, 'error');
-            dbPlayers.unshift(created); document.getElementById('viv-name').value = ''; renderClubVivaio(); showToast(`Aggiunto (${created.public_code})!`, 'success');
+            dbPlayers.unshift(created); document.getElementById('viv-name').value = ''; document.getElementById('viv-consent-box').innerHTML = consentBoxHtml('viv', 'club'); renderClubVivaio(); showToast(`Aggiunto (${created.public_code})!`, 'success');
         }
 
         function renderClubVivaio() {
@@ -1147,7 +1168,7 @@
 
         function setAdminTab(tab) {
             adminTab = tab;
-            ['players', 'scouts', 'clubs', 'affiliations'].forEach(t => document.getElementById(`admtab-${t}`).className = t === tab ? 'min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on' : 'min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off');
+            ['players', 'scouts', 'clubs', 'affiliations', 'privacy'].forEach(t => document.getElementById(`admtab-${t}`).className = t === tab ? 'min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on' : 'min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off');
             const box = document.getElementById('admin-content-container');
 
             if (tab === 'players') {
@@ -1155,6 +1176,8 @@
             } else if (tab === 'scouts' || tab === 'clubs') {
                 const list = dbProfiles.filter(u => u.role === (tab === 'scouts' ? 'scout' : 'club'));
                 box.innerHTML = `<table class="w-full text-left text-xs sm:text-sm min-w-[680px]"><thead class="bg-canvas border-b border-line text-muted"><tr><th class="p-3">ID</th><th class="p-3">Nome</th><th class="p-3">Org / Qualifica</th><th class="p-3">Tel</th><th class="p-3">Email</th><th class="p-3 text-right">Azioni</th></tr></thead><tbody class="divide-y divide-line">${list.map(u => `<tr><td class="p-3 font-mono font-bold text-xs">${esc(u.public_code||'-')}</td><td class="p-3 font-semibold">${esc(u.full_name)}</td><td class="p-3">${esc(u.organization||'-')}</td><td class="p-3">${esc(u.phone||'-')}</td><td class="p-3 text-muted">${esc(u.email||'-')}</td><td class="p-3 text-right"><button onclick="openAdminEdit('profile',${jsq(u.id)})" class="text-accent underline font-semibold">Modifica Tutto</button></td></tr>`).join('')}</tbody></table>`;
+            } else if (tab === 'privacy') {
+                renderAdminPrivacy(box);
             } else {
                 const scouts = dbProfiles.filter(u => u.role === 'scout'), clubs = dbProfiles.filter(u => u.role === 'club');
                 box.innerHTML = `
@@ -1306,23 +1329,11 @@
             document.getElementById('dm-reviews-list').innerHTML = st.list.length
                 ? st.list.map(r => `<div class="p-4 bg-canvas/60 rounded-md border border-line space-y-2"><div class="flex justify-between text-xs"><strong>${esc(r.observer_name)} (${esc(r.observer_role||'Scout')})</strong><span class="font-bold text-accent">Media ${Number(r.avg).toFixed(1)}</span></div><div class="flex flex-wrap gap-1.5">${Object.entries(r.scores||{}).map(([k,v])=>`<span class="px-2 py-0.5 bg-white border border-line rounded text-[11px]">${esc(k)}: <strong>${esc(v)}</strong></span>`).join('')}</div><p class="text-xs bg-white p-3 rounded border border-line">${esc(r.notes)}</p><div class="flex justify-between text-[11px] text-muted"><span>${formatDateIT(r.obs_date)} • ${esc(r.location)} (${esc(r.context)})</span><strong>${esc(r.outcome)}</strong></div></div>`).join('')
                 : '<p class="text-sm text-muted text-center py-4">Nessuna osservazione registrata.</p>';
+            renderDetailExtras(p);
             document.getElementById('detail-modal').classList.remove('hidden');
         }
         function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
-
-        function exportDetailPDF() {
-            const p = dbPlayers.find(x => x.id === currentDetailPlayerId); if (!p) return;
-            const st = getPlayerStats(p.id), age = calculateAge(p.dob);
-            const clubLogo = (currentUser?.role === 'club' && currentUser?.avatar_url) ? `<img src="${esc(currentUser.avatar_url)}" style="height:44px;width:44px;object-fit:contain;border-radius:6px;border:1px solid #E5E5EA;padding:2px;">` : '';
-            const verdictStr = Object.entries(st.verdicts).map(([k, v]) => `${v} ${k}`).join(' • ') || 'Nessun esito';
-
-            const barsPdf = Object.entries(st.keyAvgs).length === 0 ? '<div style="font-size:10px;color:#6E6E73;">Nessun punteggio disponibile.</div>' : Object.entries(st.keyAvgs).map(([k, v]) => `<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;"><span style="font-weight:600;color:#1D1D1F;">${esc(k)} — ${esc(TIPS_FULL_LABELS[k] || k)}</span><span style="font-weight:700;color:#0B8A5C;">${v.toFixed(1)} / 10</span></div><div style="width:100%;height:6px;background:#E5E5EA;border-radius:3px;overflow:hidden;"><div style="width:${Math.min(100, v * 10)}%;height:100%;background:#0B8A5C;"></div></div></div>`).join('');
-
-            const obsPdf = st.list.length === 0 ? '<div style="padding:12px;text-align:center;color:#6E6E73;font-size:10px;border:1px solid #E5E5EA;border-radius:6px;">Nessuna osservazione registrata.</div>' : st.list.map(r => `<div class="avoid-break" style="border:1px solid #E5E5EA;border-radius:6px;padding:10px 12px;margin-bottom:10px;background:#FAFAFC;"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E5E5EA;padding-bottom:6px;margin-bottom:6px;"><div><div style="font-size:10.5px;font-weight:700;color:#1D1D1F;">${esc(r.observer_name)} <span style="font-weight:400;color:#6E6E73;">(${esc(r.observer_role || 'Scout')})</span></div><div style="font-size:9px;color:#6E6E73;margin-top:2px;">Data: <strong>${formatDateIT(r.obs_date)}</strong> • Luogo: ${esc(r.location)} • Contesto: ${esc(r.context)} • Atteggiamento: ${esc(r.attitude)}</div></div><div style="text-align:right;"><span style="background:#1D1D1F;color:#FFF;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;">Media ${Number(r.avg).toFixed(1)}</span><div style="font-size:8.5px;font-weight:700;color:#0B8A5C;margin-top:3px;">${esc(r.outcome)}</div></div></div><div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:5px;">${Object.entries(r.scores || {}).map(([k, v]) => `<span style="background:#FFF;border:1px solid #D2D2D7;border-radius:4px;padding:2px 6px;font-size:8.5px;"><strong>${esc(k)}:</strong> ${Number(v).toFixed(1)}</span>`).join('')}</div><p style="margin:0;font-size:9.5px;line-height:1.5;color:#1D1D1F;">${esc(r.notes)}</p></div>`).join('');
-
-            document.getElementById('print-area').innerHTML = `<div class="pdf-doc"><div><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1D1D1F;padding-bottom:10px;margin-bottom:16px;"><div><div style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:#0B8A5C;text-transform:uppercase;">SCOUTING DEPARTMENT • OFFICIAL PLAYER REPORT • ${esc(p.public_code || '')}</div><div style="font-size:10px;color:#6E6E73;margin-top:2px;">Report generato il ${new Date().toLocaleDateString('it-IT')} ${currentUser?.organization ? '• ' + esc(currentUser.organization) : ''}</div></div>${clubLogo}</div><div style="display:flex;gap:14px;align-items:center;background:#F5F5F7;border:1px solid #E5E5EA;border-radius:8px;padding:12px;margin-bottom:16px;"><img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" style="width:78px;height:78px;border-radius:6px;object-fit:cover;border:1px solid #D2D2D7;background:#FFF;"><div style="flex:1;"><div style="font-size:20px;font-weight:700;color:#1D1D1F;line-height:1.15;">${esc(p.name)}</div><div style="font-size:11px;font-weight:600;color:#0B8A5C;margin-top:2px;">${esc(p.role_category)} • ${esc(p.club || 'Svincolato')} ${p.league ? '(' + esc(p.league) + ')' : ''}</div><div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;margin-top:8px;font-size:9.5px;color:#1D1D1F;"><div><span style="color:#6E6E73;">Nascita:</span> <strong>${formatDateIT(p.dob)}</strong> ${age ? `(${age} anni)` : ''}</div><div><span style="color:#6E6E73;">Fisico:</span> <strong>${esc(p.height || '-')} cm / ${esc(p.weight || '-')} kg</strong></div><div><span style="color:#6E6E73;">Piede:</span> <strong>${esc(p.foot)}</strong></div><div style="grid-column:span 2;"><span style="color:#6E6E73;">Residenza:</span> <strong>${esc(p.residence || '-')}</strong></div><div><span style="color:#6E6E73;">ID Atleta:</span> <strong>${esc(p.public_code || '-')}</strong></div></div></div></div><div class="avoid-break" style="display:grid;grid-template-columns:1fr 1.6fr;gap:14px;margin-bottom:18px;"><div style="background:#1D1D1F;color:#FFF;border-radius:8px;padding:14px;display:flex;flex-direction:column;justify-content:center;text-align:center;"><div style="font-size:9px;font-weight:600;letter-spacing:1px;color:#A1A1A6;text-transform:uppercase;">MEDIA GLOBALE T.I.P.S.</div><div style="font-size:36px;font-weight:700;color:#FFF;line-height:1.1;margin:6px 0;">${st.avg !== null ? st.avg.toFixed(1) : '—'}</div><div style="font-size:10px;color:#D2D2D7;">Basata su <strong>${st.count}</strong> ${st.count === 1 ? 'osservazione' : 'osservazioni'}</div><div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.15);font-size:9px;color:${st.discordant ? '#FBBF24' : '#34D399'};font-weight:600;">${st.discordant ? `Pareri discordanti (scarto ${st.spread} pt)` : (st.count >= 2 ? `Alto Consenso (scarto ${st.spread} pt)` : 'Valutazione singola')}</div><div style="font-size:8.5px;color:#A1A1A6;margin-top:4px;">${esc(verdictStr)}</div></div><div style="border:1px solid #E5E5EA;border-radius:8px;padding:12px;"><div style="font-size:10px;font-weight:700;color:#1D1D1F;text-transform:uppercase;margin-bottom:10px;">Medie per Parametro T.I.P.S.</div>${barsPdf}</div></div><div style="font-size:11px;font-weight:700;color:#1D1D1F;text-transform:uppercase;border-bottom:1px solid #E5E5EA;padding-bottom:5px;margin-bottom:10px;">Storico Cronologico Osservazioni (${st.count})</div>${obsPdf}</div><div style="border-top:1px solid #E5E5EA;padding-top:8px;margin-top:20px;display:flex;justify-content:space-between;font-size:8.5px;color:#6E6E73;"><span>Scouting Department — Documento Riservato ad uso interno</span><span>${esc(p.name)} (${esc(p.public_code||'')}) • ${new Date().toLocaleDateString('it-IT')}</span></div></div>`;
-            window.print();
-        }
     </script>
+    <script src="modules.js"></script>
 </body>
 </html>

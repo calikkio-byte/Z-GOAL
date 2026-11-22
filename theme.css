@@ -145,3 +145,9 @@ input[type="range"].scout-slider::-webkit-slider-thumb { border-color: var(--acc
 
 /* ---------- Stampa: nessun effetto ---------- */
 @media print { .bg-orbs { display: none !important; } }
+
+/* ---------- Omino e lavagna ---------- */
+.bz { transition: fill-opacity .15s, stroke .15s; }
+.bz-i { cursor: pointer; }
+.bz-i:hover { stroke: #0B8A5C; stroke-width: 2.6; }
+.pb { transition: box-shadow .15s, background .15s; }
