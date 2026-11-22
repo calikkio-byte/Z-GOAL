@@ -7,7 +7,7 @@
     <title>Scouting Dept — Piattaforma Atleti, Scout, Società & Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="tailwind.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="vendor/supabase-js-2.119.2.js"></script>
@@ -19,10 +19,10 @@
             -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
         }
-        body { background-color: #F5F5F7; color: #1D1D1F; font-size: 15px; line-height: 1.5; overflow-x: hidden; }
+        body { color: #10202F; font-size: 15px; line-height: 1.5; overflow-x: hidden; }
         input[type="range"].scout-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: #D2D2D7; border-radius: 3px; outline: none; }
-        input[type="range"].scout-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 6px; background: #FFF; border: 2px solid #0071E3; box-shadow: 0 2px 5px rgba(0,0,0,0.14); cursor: pointer; }
-        input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid #0071E3; outline-offset: 1px; }
+        input[type="range"].scout-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 6px; background: #FFF; border: 2px solid #0B8A5C; box-shadow: 0 2px 5px rgba(0,0,0,0.14); cursor: pointer; }
+        input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid #0B8A5C; outline-offset: 1px; }
 
         .pdf-doc { width: 210mm; min-height: 297mm; background: #FFF; color: #1D1D1F; padding: 14mm 15mm; margin: 0 auto; box-sizing: border-box; }
         .avoid-break { page-break-inside: avoid; break-inside: avoid; }
@@ -34,8 +34,11 @@
             .pdf-doc { width: 100% !important; min-height: auto !important; padding: 4mm 12mm !important; }
         }
     </style>
+    <link rel="stylesheet" href="theme.css">
 </head>
 <body class="pb-16">
+
+    <div class="bg-orbs no-print" aria-hidden="true"><i class="o1"></i><i class="o2"></i><i class="o3"></i></div>
 
     <!-- TOAST -->
     <div id="toast-container" class="no-print fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-md pointer-events-none"></div>
@@ -43,28 +46,53 @@
     <!-- ===================================================================== -->
     <!-- SCREEN 0: AUTENTICAZIONE                                              -->
     <!-- ===================================================================== -->
-    <section id="view-auth" class="no-print min-h-screen flex items-center justify-center p-4 sm:p-6">
-        <div class="w-full max-w-xl bg-white rounded-lg border border-line shadow-sm p-6 sm:p-8">
-            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-line">
-                <div class="w-10 h-10 rounded-md bg-ink text-white flex items-center justify-center"><i class="fa-solid fa-shield-halved"></i></div>
-                <div>
-                    <h1 class="font-bold text-xl text-ink tracking-tight">Scouting Dept</h1>
-                    <p class="text-xs text-muted">Piattaforma Calcio — Atleti, Scout & Società</p>
+    <section id="view-auth" class="no-print min-h-screen flex items-center justify-center px-4 py-10 sm:px-8">
+        <svg class="pitch" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="#0B8A5C" stroke-opacity=".15" stroke-width="2">
+            <line x1="1010" y1="-20" x2="1010" y2="920"/>
+            <circle cx="1010" cy="450" r="150"/>
+            <circle cx="1010" cy="450" r="6" fill="#0B8A5C" fill-opacity=".22"/>
+            <rect x="1010" y="250" width="520" height="400"/>
+            <rect x="1010" y="340" width="300" height="220"/>
+        </svg>
+
+        <div class="auth-grid">
+            <div class="auth-top">
+                <div class="flex items-center gap-3.5 mb-7 lg:mb-10">
+                    <div class="logo-mark"><svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FD19A"/><stop offset="1" stop-color="#0B8A5C"/></linearGradient></defs><rect width="40" height="40" fill="url(#lg1)"/><circle cx="31" cy="9" r="14" fill="#fff" fill-opacity=".14"/><circle cx="20" cy="20" r="8" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M20 6v28" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".92"/><circle cx="20" cy="20" r="2.3" fill="#fff"/></svg></div>
+                    <div class="leading-tight"><div class="font-display font-bold text-xl text-ink">Scouting Dept</div><div class="text-xs text-muted">Piattaforma calcio · Atleti, scout e società</div></div>
                 </div>
+                <h1 class="auth-title">Il talento, osservato con <em>metodo</em>.</h1>
+                <p class="auth-sub">Schede ordinate, valutazioni T.I.P.S. e privacy sotto controllo: tutto in un solo posto, dal telefono o dal computer.</p>
             </div>
 
-            <div class="grid grid-cols-3 gap-1 bg-canvas p-1 rounded-md border border-line mb-6">
-                <button onclick="setAuthTab('login')" id="atab-login" class="py-2 rounded text-xs sm:text-sm font-semibold bg-white text-ink shadow-sm">Accedi</button>
-                <button onclick="setAuthTab('register')" id="atab-register" class="py-2 rounded text-xs sm:text-sm font-medium text-muted">Registrati</button>
-                <button onclick="setAuthTab('reset')" id="atab-reset" class="py-2 rounded text-xs sm:text-sm font-medium text-muted">Password</button>
+            <div class="auth-cards grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="glass role-mini"><div class="ico" style="background:linear-gradient(135deg,#4FD6A0,#12A16C)"><i class="fa-solid fa-user"></i></div><h3>Atleti e famiglie</h3><p>Scheda, partite e consenso nelle tue mani.</p></div>
+                <div class="glass role-mini"><div class="ico" style="background:linear-gradient(135deg,#6FA3FF,#3B63E8)"><i class="fa-solid fa-magnifying-glass"></i></div><h3>Scout</h3><p>Valuta con lo stesso metodo, ovunque tu sia.</p></div>
+                <div class="glass role-mini"><div class="ico" style="background:linear-gradient(135deg,#F8C14A,#F08A24)"><i class="fa-solid fa-shield-halved"></i></div><h3>Società</h3><p>Cerca, confronta e gestisci il tuo vivaio.</p></div>
             </div>
 
-            <!-- LOGIN -->
-            <div id="auth-panel-login" class="space-y-4">
-                <div><label class="text-xs font-semibold block mb-1">Email</label><input type="email" id="login-email" placeholder="nome@esempio.it" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm"></div>
-                <div><label class="text-xs font-semibold block mb-1">Password</label><input type="password" id="login-password" placeholder="••••••••" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm"></div>
-                <button onclick="handleLogin()" class="w-full min-h-[46px] rounded-md bg-accent hover:bg-accent-hover text-white font-semibold text-sm transition">Accedi alla Piattaforma</button>
-            </div>
+            <div class="auth-form glass auth-card">
+                <div class="mb-6">
+                    <h2 class="font-display text-2xl font-bold text-ink">Bentornato</h2>
+                    <p class="text-sm text-muted mt-1">Accedi o crea il tuo account per iniziare.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-1 bg-canvas p-1 rounded-2xl mb-6">
+                    <button onclick="setAuthTab('login')" id="atab-login" class="py-2.5 rounded-xl text-sm font-semibold tab-on">Accedi</button>
+                    <button onclick="setAuthTab('register')" id="atab-register" class="py-2.5 rounded-xl text-sm font-medium tab-off">Registrati</button>
+                    <button onclick="setAuthTab('reset')" id="atab-reset" class="py-2.5 rounded-xl text-sm font-medium tab-off">Password</button>
+                </div>
+
+                <!-- LOGIN -->
+                <div id="auth-panel-login" class="space-y-4">
+                    <div><label class="text-xs font-semibold block mb-1.5 text-ink">Email</label><input type="email" id="login-email" autocomplete="email" placeholder="nome@esempio.it" class="w-full min-h-[48px] px-4 text-sm"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5"><label class="text-xs font-semibold text-ink">Password</label><button type="button" onclick="setAuthTab('reset')" class="text-xs font-semibold text-accent hover:underline">Password dimenticata?</button></div>
+                        <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()" class="w-full min-h-[48px] px-4 text-sm">
+                    </div>
+                    <button onclick="handleLogin()" class="w-full min-h-[50px] rounded-xl bg-accent hover:bg-accent-hover text-white font-semibold text-sm">Accedi alla piattaforma</button>
+                    <p class="text-center text-xs text-muted pt-1">Non hai un account? <button type="button" onclick="setAuthTab('register')" class="font-semibold text-accent hover:underline">Registrati</button></p>
+                </div>
 
             <!-- REGISTER -->
             <div id="auth-panel-register" class="hidden space-y-4">
@@ -105,8 +133,11 @@
             <!-- SET NEW PASSWORD -->
             <div id="auth-panel-setpwd" class="hidden space-y-4">
                 <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-md text-xs text-emerald-900 font-medium">Email confermata! Imposta ora la tua password.</div>
-                <input type="password" id="new-password-input" placeholder="Nuova password (min. 6 caratteri)" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm">
+                <input type="password" id="new-password-input" placeholder="Nuova password (min. 8 caratteri)" class="w-full min-h-[44px] px-3.5 bg-canvas/40 border border-line rounded-md text-sm">
                 <button onclick="handleSaveNewPassword()" class="w-full min-h-[46px] rounded-md bg-emerald-700 text-white font-semibold text-sm">Salva Password ed Entra</button>
+            </div>
+
+                <p class="text-[11px] text-muted text-center mt-6"><i class="fa-solid fa-lock mr-1"></i>Le schede sono visibili a scout e società solo con il consenso della famiglia.</p>
             </div>
         </div>
     </section>
@@ -115,11 +146,11 @@
     <!-- APP SHELL                                                             -->
     <!-- ===================================================================== -->
     <div id="app-shell" class="hidden">
-        <header class="no-print sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-line">
+        <header class="no-print sticky top-0 z-30 glass-bar">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                     <img id="hdr-avatar-img" src="" class="hidden w-9 h-9 rounded-md object-cover border border-line flex-shrink-0 bg-white">
-                    <div id="hdr-avatar-fallback" class="w-9 h-9 rounded-md bg-ink text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-shield-halved text-sm"></i></div>
+                    <div id="hdr-avatar-fallback" class="logo-mark" style="width:38px;height:38px;border-radius:12px"><svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FD19A"/><stop offset="1" stop-color="#0B8A5C"/></linearGradient></defs><rect width="40" height="40" fill="url(#lg2)"/><circle cx="31" cy="9" r="14" fill="#fff" fill-opacity=".14"/><circle cx="20" cy="20" r="8" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M20 6v28" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".92"/><circle cx="20" cy="20" r="2.3" fill="#fff"/></svg></div>
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-semibold text-base text-ink">Scouting Dept</span>
@@ -129,7 +160,7 @@
                         <p id="hdr-user-name" class="text-xs text-muted truncate max-w-[170px] sm:max-w-xs"></p>
                     </div>
                 </div>
-                <button onclick="handleLogout()" class="min-h-[38px] px-3.5 rounded-md bg-canvas hover:bg-line border border-line text-ink text-xs font-semibold transition">
+                <button onclick="handleLogout()" class="min-h-[38px] px-3.5 rounded-xl glass text-ink text-xs font-semibold">
                     <i class="fa-solid fa-right-from-bracket mr-1"></i> Esci
                 </button>
             </div>
@@ -148,19 +179,19 @@
             </div>
 
             <!-- CLAIM EXISTING PROFILE BY ID ATLETA (IF NOT LINKED YET) -->
-            <div id="player-claim-box" class="hidden bg-accent-soft border border-blue-200 rounded-lg p-5 space-y-3">
+            <div id="player-claim-box" class="hidden bg-accent-soft border border-emerald-200 rounded-lg p-5 space-y-3">
                 <div>
                     <h2 class="font-semibold text-sm text-ink"><i class="fa-solid fa-link text-accent mr-1.5"></i>Hai già un ID Atleta fornito da uno scout?</h2>
                     <p class="text-xs text-muted mt-0.5">Inseriscilo qui per collegare la scheda già esistente al tuo account senza creare duplicati.</p>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="claim-code-input" placeholder="Es. ATL-4F8A2" class="flex-1 min-h-[42px] px-3 bg-white border border-blue-300 rounded-md text-sm font-mono uppercase">
+                    <input type="text" id="claim-code-input" placeholder="Es. ATL-1A2B3C4D5E6F" class="flex-1 min-h-[42px] px-3 bg-white border border-emerald-300 rounded-md text-sm font-mono uppercase">
                     <button onclick="claimPlayerByCode()" class="min-h-[42px] px-4 rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Collega Scheda</button>
                 </div>
             </div>
 
             <!-- OBSERVATION PINGS (ZERO SCORES) -->
-            <div class="bg-white rounded-lg p-5 border border-line">
+            <div class="glass rounded-2xl p-5 border border-line">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="font-semibold text-sm text-ink"><i class="fa-solid fa-eye text-accent mr-1.5"></i>Attività di Osservazione</h2>
                     <span id="player-obs-count-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded bg-accent-soft text-accent">0 osservazioni</span>
@@ -170,7 +201,7 @@
             </div>
 
             <!-- PROSSIME PARTITE -->
-            <div class="bg-white rounded-lg p-5 sm:p-6 border border-line space-y-4">
+            <div class="glass rounded-2xl p-5 sm:p-6 border border-line space-y-4">
                 <div class="pb-3 border-b border-line">
                     <h2 class="font-semibold text-base text-ink"><i class="fa-solid fa-calendar-days text-accent mr-1.5"></i>Prossime Partite in Programma</h2>
                     <p class="text-xs text-muted mt-0.5">Aiuta gli scout a sapere quando e dove venire a vederti giocare.</p>
@@ -186,10 +217,10 @@
             </div>
 
             <!-- DATI ESSENZIALI, FOTO & PRIVACY -->
-            <div class="bg-white rounded-lg p-5 sm:p-6 border border-line space-y-5">
+            <div class="glass rounded-2xl p-5 sm:p-6 border border-line space-y-5">
                 <h2 class="font-semibold text-base text-ink pb-3 border-b border-line">Foto, Dati Essenziali & Consenso Privacy</h2>
                 <div class="flex items-center gap-4 p-4 bg-canvas/50 rounded-md border border-line">
-                    <img id="pp-photo-preview" src="https://placehold.co/160x160/E5E5EA/6E6E73?text=FOTO" class="w-20 h-20 rounded-md object-cover border border-line bg-white flex-shrink-0">
+                    <img id="pp-photo-preview" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23DCEBE4%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23C9DCEE%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-size%3D%2222%22%20font-weight%3D%22700%22%20fill%3D%22%235B6B7A%22%20letter-spacing%3D%222%22%3EFOTO%3C%2Ftext%3E%3C%2Fsvg%3E" class="w-20 h-20 rounded-md object-cover border border-line bg-white flex-shrink-0">
                     <div class="space-y-1.5">
                         <div class="text-xs font-semibold text-ink">Foto Profilo Calciatore</div>
                         <p class="text-[11px] text-muted">Verrà mostrata nella scheda e nel report PDF.</p>
@@ -227,11 +258,11 @@
         <!-- 2. DASHBOARD SCOUT                                                -->
         <!-- ================================================================= -->
         <main id="role-view-scout" class="no-print hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-5">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
-                <button onclick="setScoutTab('players')" id="stab-players" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">Giocatori</button>
-                <button onclick="setScoutTab('requests')" id="stab-requests" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Richieste Società</button>
-                <button onclick="setScoutTab('clubs')" id="stab-clubs" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">I Miei Club</button>
-                <button onclick="setScoutTab('profile')" id="stab-profile" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Il Mio Profilo</button>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 glass p-1.5 rounded-2xl">
+                <button onclick="setScoutTab('players')" id="stab-players" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on">Giocatori</button>
+                <button onclick="setScoutTab('requests')" id="stab-requests" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Richieste Società</button>
+                <button onclick="setScoutTab('clubs')" id="stab-clubs" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">I Miei Club</button>
+                <button onclick="setScoutTab('profile')" id="stab-profile" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Il Mio Profilo</button>
             </div>
 
             <!-- SCOUT TAB 1: GIOCATORI -->
@@ -244,8 +275,9 @@
                     <button onclick="openNewPlayerByScoutModal()" class="min-h-[40px] px-4 rounded-md bg-accent hover:bg-accent-hover text-white text-xs sm:text-sm font-semibold"><i class="fa-solid fa-plus mr-1.5"></i>Nuovo Giocatore</button>
                 </div>
 
-                <div class="bg-white rounded-lg p-4 border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-                    <input type="text" id="sf-search" oninput="renderScoutPlayersList()" placeholder="Cerca nome, ID (ATL-...), club..." class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
+                <button type="button" onclick="toggleFilters('sf-filters', this)" class="filters-toggle glass" aria-expanded="false"><span><i class="fa-solid fa-sliders mr-2 text-accent"></i>Filtri e ricerca</span><i class="fa-solid fa-chevron-down text-muted text-xs"></i></button>
+                <div id="sf-filters" class="filters-panel glass rounded-2xl p-4 border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
+                    <input type="text" id="sf-search" oninput="renderScoutPlayersList()" placeholder="Cerca nome, ID (ATL-...), club..." class="lg:col-span-2 min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
                     <select id="sf-role" onchange="renderScoutPlayersList()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm"><option value="ALL">Ruolo: Tutti</option><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option></select>
                     <select id="sf-year" onchange="renderScoutPlayersList()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm"><option value="ALL">Annata: Tutte</option></select>
                     <select id="sf-status" onchange="renderScoutPlayersList()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm"><option value="ALL">Stato: Tutti</option><option value="todo">Da osservare</option><option value="done">Già valutati da me</option></select>
@@ -271,13 +303,13 @@
             </div>
 
             <!-- SCOUT TAB 4: PROFILO SCOUT -->
-            <div id="scout-panel-profile" class="hidden max-w-2xl mx-auto bg-white rounded-lg p-5 sm:p-6 border border-line space-y-5">
+            <div id="scout-panel-profile" class="hidden max-w-2xl mx-auto glass rounded-2xl p-5 sm:p-6 border border-line space-y-5">
                 <div class="flex items-center justify-between pb-3 border-b border-line">
                     <h2 class="text-lg font-bold text-ink">Modifica i Tuoi Dati (Scout)</h2>
                     <span id="sp-code-badge" class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-canvas border border-line"></span>
                 </div>
                 <div class="flex items-center gap-4 p-4 bg-canvas/50 rounded-md border border-line">
-                    <img id="sp-avatar-preview" src="https://placehold.co/160x160/E5E5EA/6E6E73?text=SCOUT" class="w-20 h-20 rounded-md object-cover border border-line bg-white flex-shrink-0">
+                    <img id="sp-avatar-preview" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23DCEBE4%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23C9DCEE%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-size%3D%2222%22%20font-weight%3D%22700%22%20fill%3D%22%235B6B7A%22%20letter-spacing%3D%222%22%3ESCOUT%3C%2Ftext%3E%3C%2Fsvg%3E" class="w-20 h-20 rounded-md object-cover border border-line bg-white flex-shrink-0">
                     <div class="space-y-1.5">
                         <div class="text-xs font-semibold text-ink">Foto Profilo Scout</div>
                         <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-line hover:bg-canvas text-xs font-semibold text-ink cursor-pointer">
@@ -302,20 +334,21 @@
         <!-- 3. DASHBOARD SOCIETÀ                                              -->
         <!-- ================================================================= -->
         <main id="role-view-club" class="no-print hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-5">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
-                <button onclick="setClubTab('showcase')" id="ctab-showcase" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">Vetrina</button>
-                <button onclick="setClubTab('vivaio')" id="ctab-vivaio" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Vivaio</button>
-                <button onclick="setClubTab('requests')" id="ctab-requests" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted flex items-center justify-center gap-1.5">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 glass p-1.5 rounded-2xl">
+                <button onclick="setClubTab('showcase')" id="ctab-showcase" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on">Vetrina</button>
+                <button onclick="setClubTab('vivaio')" id="ctab-vivaio" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Vivaio</button>
+                <button onclick="setClubTab('requests')" id="ctab-requests" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off flex items-center justify-center gap-1.5">
                     <span>Scout & Richieste</span>
                     <span id="club-tab-notif-dot" class="hidden px-1.5 py-0.5 rounded-full bg-crimson text-white text-[10px] font-bold">0</span>
                 </button>
-                <button onclick="setClubTab('profile')" id="ctab-profile" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Profilo Club</button>
+                <button onclick="setClubTab('profile')" id="ctab-profile" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Profilo Club</button>
             </div>
 
             <!-- VETRINA -->
             <div id="club-panel-showcase" class="space-y-4">
-                <div class="bg-white rounded-lg p-4 border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-                    <input type="text" id="club-f-search" oninput="renderClubShowcase()" placeholder="Cerca nome, ID o club..." class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
+                <button type="button" onclick="toggleFilters('club-filters', this)" class="filters-toggle glass" aria-expanded="false"><span><i class="fa-solid fa-sliders mr-2 text-accent"></i>Filtri e ricerca</span><i class="fa-solid fa-chevron-down text-muted text-xs"></i></button>
+                <div id="club-filters" class="filters-panel glass rounded-2xl p-4 border border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
+                    <input type="text" id="club-f-search" oninput="renderClubShowcase()" placeholder="Cerca nome, ID o club..." class="lg:col-span-2 min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm">
                     <select id="club-f-role" onchange="renderClubShowcase()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm"><option value="ALL">Ruolo: Tutti</option><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option></select>
                     <select id="club-f-foot" onchange="renderClubShowcase()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm"><option value="ALL">Piede: Tutti</option><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select>
                     <select id="club-f-year" onchange="renderClubShowcase()" class="min-h-[40px] px-3 bg-canvas/50 border border-line rounded-md text-sm"><option value="ALL">Annata: Tutte</option></select>
@@ -326,7 +359,7 @@
 
             <!-- VIVAIO -->
             <div id="club-panel-vivaio" class="hidden space-y-5">
-                <div class="bg-white rounded-lg p-5 border border-line space-y-4">
+                <div class="glass rounded-2xl p-5 border border-line space-y-4">
                     <div>
                         <h2 class="text-lg font-bold text-ink">Inserisci un Talento del Tuo Vivaio</h2>
                         <p class="text-xs text-muted">Visibile solo alla tua società e agli scout accettati.</p>
@@ -344,14 +377,14 @@
 
             <!-- SCOUT AFFILIATI & RICHIESTE -->
             <div id="club-panel-requests" class="hidden space-y-5">
-                <div class="bg-white rounded-lg p-5 border border-line space-y-3">
+                <div class="glass rounded-2xl p-5 border border-line space-y-3">
                     <div class="flex items-center justify-between">
                         <h2 class="text-base font-bold text-ink">Scout del Club & Richieste di Affiliazione</h2>
                         <span id="club-pending-badge" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded bg-amber-100 text-amber-800">0 in attesa</span>
                     </div>
                     <div id="club-affiliations-list" class="space-y-2.5"></div>
                 </div>
-                <div class="bg-white rounded-lg p-5 border border-line space-y-4">
+                <div class="glass rounded-2xl p-5 border border-line space-y-4">
                     <h2 class="text-base font-bold text-ink">Nuova Richiesta di Ricerca per gli Scout</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input id="creq-title" placeholder="Es. Cerchiamo Esterno Sinistro" class="min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
@@ -365,13 +398,13 @@
             </div>
 
             <!-- PROFILO CLUB -->
-            <div id="club-panel-profile" class="hidden max-w-2xl mx-auto bg-white rounded-lg p-5 sm:p-6 border border-line space-y-5">
+            <div id="club-panel-profile" class="hidden max-w-2xl mx-auto glass rounded-2xl p-5 sm:p-6 border border-line space-y-5">
                 <div class="flex items-center justify-between pb-3 border-b border-line">
                     <h2 class="text-lg font-bold text-ink">Modifica Dati & Stemma Società</h2>
                     <span id="cp-code-badge" class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-canvas border border-line"></span>
                 </div>
                 <div class="flex items-center gap-4 p-4 bg-canvas/50 rounded-md border border-line">
-                    <img id="cp-avatar-preview" src="https://placehold.co/160x160/E5E5EA/6E6E73?text=LOGO" class="w-20 h-20 rounded-md object-contain border border-line bg-white p-1 flex-shrink-0">
+                    <img id="cp-avatar-preview" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23DCEBE4%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23C9DCEE%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-size%3D%2222%22%20font-weight%3D%22700%22%20fill%3D%22%235B6B7A%22%20letter-spacing%3D%222%22%3ELOGO%3C%2Ftext%3E%3C%2Fsvg%3E" class="w-20 h-20 rounded-md object-contain border border-line bg-white p-1 flex-shrink-0">
                     <div class="space-y-1.5">
                         <div class="text-xs font-semibold text-ink">Stemma / Logo Società</div>
                         <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-line hover:bg-canvas text-xs font-semibold text-ink cursor-pointer">
@@ -398,22 +431,22 @@
         <!-- ================================================================= -->
         <main id="role-view-admin" class="no-print hidden max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-5">
             <div class="grid grid-cols-3 gap-3">
-                <div class="bg-white rounded-lg p-4 border border-line"><div class="text-xs text-muted">Calciatori</div><div id="adm-kpi-players" class="text-2xl font-bold text-ink mt-1">0</div></div>
-                <div class="bg-white rounded-lg p-4 border border-line"><div class="text-xs text-muted">Scout</div><div id="adm-kpi-scouts" class="text-2xl font-bold text-ink mt-1">0</div></div>
-                <div class="bg-white rounded-lg p-4 border border-line"><div class="text-xs text-muted">Società</div><div id="adm-kpi-clubs" class="text-2xl font-bold text-ink mt-1">0</div></div>
+                <div class="glass rounded-2xl p-4 border border-line"><div class="text-xs text-muted">Calciatori</div><div id="adm-kpi-players" class="text-2xl font-bold text-ink mt-1">0</div></div>
+                <div class="glass rounded-2xl p-4 border border-line"><div class="text-xs text-muted">Scout</div><div id="adm-kpi-scouts" class="text-2xl font-bold text-ink mt-1">0</div></div>
+                <div class="glass rounded-2xl p-4 border border-line"><div class="text-xs text-muted">Società</div><div id="adm-kpi-clubs" class="text-2xl font-bold text-ink mt-1">0</div></div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-white p-1.5 rounded-lg border border-line">
-                <button onclick="setAdminTab('players')" id="admtab-players" class="min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white">Calciatori</button>
-                <button onclick="setAdminTab('scouts')" id="admtab-scouts" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Scout</button>
-                <button onclick="setAdminTab('clubs')" id="admtab-clubs" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Società</button>
-                <button onclick="setAdminTab('affiliations')" id="admtab-affiliations" class="min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted">Assegna Scout ↔ Club</button>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 glass p-1.5 rounded-2xl">
+                <button onclick="setAdminTab('players')" id="admtab-players" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on">Calciatori</button>
+                <button onclick="setAdminTab('scouts')" id="admtab-scouts" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Scout</button>
+                <button onclick="setAdminTab('clubs')" id="admtab-clubs" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Società</button>
+                <button onclick="setAdminTab('affiliations')" id="admtab-affiliations" class="min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off">Assegna Scout ↔ Club</button>
             </div>
-            <div id="admin-content-container" class="bg-white rounded-lg border border-line overflow-x-auto"></div>
+            <div id="admin-content-container" class="glass rounded-2xl border border-line overflow-x-auto"></div>
         </main>
 
         <!-- MODAL: VALUTA GIOCATORE (SCOUT) -->
         <div id="evaluate-modal" class="no-print hidden fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-line space-y-4">
+            <div class="glass rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-line space-y-4">
                 <div class="flex items-start justify-between pb-3 border-b border-line">
                     <div><span class="text-[11px] font-semibold uppercase text-accent">Nuova Valutazione T.I.P.S.</span><h3 id="eval-player-name" class="text-xl font-bold text-ink"></h3><p id="eval-player-meta" class="text-xs text-muted"></p></div>
                     <button onclick="closeEvaluateModal()" class="w-9 h-9 rounded-md hover:bg-canvas text-muted"><i class="fa-solid fa-xmark"></i></button>
@@ -437,7 +470,7 @@
 
         <!-- MODAL: NUOVO GIOCATORE DA ZERO (SCOUT) -->
         <div id="new-player-scout-modal" class="no-print hidden fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl border border-line space-y-4">
+            <div class="glass rounded-2xl max-w-md w-full p-6 shadow-xl border border-line space-y-4">
                 <div class="flex items-center justify-between pb-2 border-b border-line"><h3 class="font-bold text-base">Nuova Scheda Calciatore</h3><button onclick="closeNewPlayerByScoutModal()" class="text-muted"><i class="fa-solid fa-xmark"></i></button></div>
                 <div class="space-y-3">
                     <input id="nps-name" placeholder="Nome e Cognome *" class="w-full min-h-[42px] px-3 bg-canvas/40 border border-line rounded-md text-sm">
@@ -460,7 +493,7 @@
 
         <!-- MODAL DETTAGLIO DOSSIER & PDF -->
         <div id="detail-modal" class="no-print hidden fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-line space-y-5">
+            <div class="glass rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-line space-y-5">
                 <div class="flex items-start justify-between pb-3 border-b border-line">
                     <div class="flex items-center gap-3">
                         <img id="dm-photo" src="" class="w-14 h-14 rounded-md object-cover border border-line bg-canvas">
@@ -474,15 +507,15 @@
                         <button onclick="closeDetailModal()" class="w-9 h-9 rounded-md hover:bg-canvas text-muted"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
-                <div id="dm-stats-bar" class="p-4 bg-canvas rounded-md border border-line space-y-3"></div>
-                <div id="dm-matches-box" class="hidden p-4 bg-accent-soft/50 rounded-md border border-blue-200 space-y-1.5"></div>
+                <div id="dm-stats-bar" class="p-4 bg-white/50 rounded-2xl border border-line"></div>
+                <div id="dm-matches-box" class="hidden p-4 bg-accent-soft/50 rounded-md border border-emerald-200 space-y-1.5"></div>
                 <div id="dm-reviews-list" class="space-y-3"></div>
             </div>
         </div>
 
         <!-- MODAL ADMIN EDIT COMPLETO (DATI + FOTO + PARTITE) -->
         <div id="admin-edit-modal" class="no-print hidden fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-line space-y-4">
+            <div class="glass rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl border border-line space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-line">
                     <h3 id="admin-edit-title" class="font-bold text-base text-ink">Modifica Completa (Admin)</h3>
                     <button onclick="closeAdminEditModal()" class="text-muted"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -511,7 +544,41 @@
             TIPSA: [{ key: 'T', label: 'T — Tecnica' }, { key: 'I', label: 'I — Intuito' }, { key: 'P', label: 'P — Personalità' }, { key: 'S', label: 'S — Speed' }, { key: 'Pow', label: 'P — Power' }, { key: 'A', label: 'A — Apprendimento' }]
         };
         const TIPS_FULL_LABELS = { T: 'Tecnica', I: 'Intuito / Intelligenza', P: 'Personalità', S: 'Speed', Sc: 'Speed Corto', Sl: 'Speed Lungo', Str: 'Struttura Fisica', Pow: 'Power', A: 'Apprendimento' };
-        const PLACEHOLDER_PHOTO = 'https://placehold.co/160x160/E5E5EA/6E6E73?text=FOTO';
+        // ----- Avatar locali (nessuna immagine esterna) e colori per ruolo -----
+        const ROLE_THEME = {
+            Portiere: { a: '#F8C14A', b: '#F08A24', ink: '#8A5300', soft: 'rgba(242,157,31,.16)' },
+            Difensore: { a: '#6FA3FF', b: '#3B63E8', ink: '#1F4FB5', soft: 'rgba(59,123,240,.14)' },
+            Centrocampista: { a: '#4FD6A0', b: '#12A16C', ink: '#0B6B47', soft: 'rgba(18,161,108,.14)' },
+            Attaccante: { a: '#FF8A7A', b: '#EF4B5A', ink: '#B3263A', soft: 'rgba(239,84,99,.14)' }
+        };
+        const DEFAULT_ROLE_THEME = { a: '#9AD8C0', b: '#4FA98A', ink: '#0B6B47', soft: 'rgba(11,138,92,.12)' };
+        function roleTheme(r) { return ROLE_THEME[r] || DEFAULT_ROLE_THEME; }
+        function initialsOf(name) { const w = String(name || '').trim().split(/\s+/).filter(Boolean); if (!w.length) return '?'; return ((w[0][0] || '') + (w.length > 1 ? (w[w.length - 1][0] || '') : '')).toUpperCase(); }
+        function svgUri(svg) { return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg); }
+        function avatarUri(name, role) {
+            const t = roleTheme(role);
+            return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${t.a}"/><stop offset="1" stop-color="${t.b}"/></linearGradient></defs><rect width="120" height="120" fill="url(#g)"/><circle cx="96" cy="22" r="40" fill="#fff" fill-opacity=".16"/><text x="60" y="76" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="46" font-weight="700" fill="#fff">${esc(initialsOf(name))}</text></svg>`);
+        }
+        function labelAvatarUri(label) {
+            return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#DCEBE4"/><stop offset="1" stop-color="#C9DCEE"/></linearGradient></defs><rect width="120" height="120" fill="url(#g)"/><text x="60" y="68" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="22" font-weight="700" fill="#5B6B7A" letter-spacing="2">${esc(label)}</text></svg>`);
+        }
+        function playerPhoto(p) { return p.photo || avatarUri(p.name, p.role_category); }
+        const PLACEHOLDER_PHOTO = labelAvatarUri('FOTO');
+
+        // Radar dei punteggi T.I.P.S. (SVG puro)
+        function radarSvg(avgs, color) {
+            const keys = Object.keys(avgs || {}); if (keys.length < 3) return '';
+            const S = 190, c = S / 2, R = 64, n = keys.length;
+            const pt = (i, val) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n, r = R * val / 10; return [c + r * Math.cos(a), c + r * Math.sin(a)]; };
+            const f = v => v.toFixed(1), pts = v => keys.map((_, i) => pt(i, v).map(f).join(',')).join(' ');
+            const rings = [2.5, 5, 7.5, 10].map(v => `<polygon points="${pts(v)}" fill="none" stroke="rgba(16,32,47,.10)"/>`).join('');
+            const axes = keys.map((_, i) => { const [x, y] = pt(i, 10); return `<line x1="${c}" y1="${c}" x2="${f(x)}" y2="${f(y)}" stroke="rgba(16,32,47,.08)"/>`; }).join('');
+            const poly = keys.map((k, i) => pt(i, Math.max(0, Math.min(10, Number(avgs[k]) || 0))).map(f).join(',')).join(' ');
+            const dots = keys.map((k, i) => { const [x, y] = pt(i, Math.max(0, Math.min(10, Number(avgs[k]) || 0))); return `<circle cx="${f(x)}" cy="${f(y)}" r="3.5" fill="${color}"/>`; }).join('');
+            const labels = keys.map((k, i) => { const [x, y] = pt(i, 12.8); return `<text x="${f(x)}" y="${f(y + 4)}" text-anchor="middle" font-size="12" font-weight="700" fill="#5B6B7A">${esc(k)}</text>`; }).join('');
+            return `<svg viewBox="0 0 ${S} ${S}" style="width:176px;height:176px" role="img" aria-label="Radar T.I.P.S.">${rings}${axes}<polygon points="${poly}" fill="${color}" fill-opacity=".22" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+        }
+        function toggleFilters(id, btn) { const el = document.getElementById(id), open = el.classList.toggle('open'); btn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
 
         let currentUser = null, isLoadingSession = false, regRole = 'player';
         let evaluatingPlayerId = null, obsDraftScores = {}, currentDetailPlayerId = null;
@@ -582,7 +649,7 @@
         // AUTH
         function setAuthTab(tab) {
             ['login', 'register', 'reset', 'setpwd'].forEach(p => document.getElementById(`auth-panel-${p}`).classList.toggle('hidden', p !== tab));
-            ['login', 'register', 'reset'].forEach(t => document.getElementById(`atab-${t}`).className = t === tab ? 'py-2 rounded text-xs sm:text-sm font-semibold bg-white text-ink shadow-sm' : 'py-2 rounded text-xs sm:text-sm font-medium text-muted');
+            ['login', 'register', 'reset'].forEach(t => document.getElementById(`atab-${t}`).className = t === tab ? 'py-2.5 rounded-xl text-sm font-semibold tab-on' : 'py-2.5 rounded-xl text-sm font-medium tab-off');
         }
         function showSetPasswordPanel() { document.getElementById('view-auth').classList.remove('hidden'); document.getElementById('app-shell').classList.add('hidden'); setAuthTab('setpwd'); }
         function selectRegRole(role) {
@@ -700,7 +767,7 @@
             else idPill.classList.add('hidden');
 
             draftPlayerPhoto = p?.photo || null;
-            document.getElementById('pp-photo-preview').src = p?.photo || PLACEHOLDER_PHOTO;
+            document.getElementById('pp-photo-preview').src = p?.photo || (p ? avatarUri(p.name, p.role_category) : PLACEHOLDER_PHOTO);
             if (p) {
                 document.getElementById('pp-name').value = p.name || '';
                 document.getElementById('pp-dob').value = p.dob || '';
@@ -790,7 +857,7 @@
             const years = [...new Set(dbPlayers.map(p => p.dob ? p.dob.slice(0,4) : null).filter(Boolean))].sort((a,b) => b - a);
             document.getElementById('sf-year').innerHTML = '<option value="ALL">Annata: Tutte</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
             document.getElementById('sp-code-badge').textContent = `ID SCOUT: ${currentUser.public_code || '-'}`;
-            document.getElementById('sp-avatar-preview').src = currentUser.avatar_url || 'https://placehold.co/160x160/E5E5EA/6E6E73?text=SCOUT';
+            document.getElementById('sp-avatar-preview').src = currentUser.avatar_url || labelAvatarUri('SCOUT');
             document.getElementById('sp-fullname').value = currentUser.full_name || '';
             document.getElementById('sp-phone').value = currentUser.phone || '';
             document.getElementById('sp-org').value = currentUser.organization || '';
@@ -801,7 +868,7 @@
         function setScoutTab(tab) {
             ['players', 'requests', 'clubs', 'profile'].forEach(t => {
                 document.getElementById(`scout-panel-${t}`).classList.toggle('hidden', t !== tab);
-                document.getElementById(`stab-${t}`).className = t === tab ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white' : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted';
+                document.getElementById(`stab-${t}`).className = t === tab ? 'min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on' : 'min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off';
             });
         }
 
@@ -833,28 +900,31 @@
                 return true;
             });
             const grid = document.getElementById('scout-players-grid');
-            if (!list.length) return grid.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessun giocatore trovato.</div>';
+            if (!list.length) return grid.innerHTML = '<div class="col-span-full glass p-8 rounded-2xl text-center text-sm text-muted">Nessun giocatore trovato.</div>';
             grid.innerHTML = list.map(p => {
                 const st = getPlayerStats(p.id);
                 const nextMatch = Array.isArray(p.upcoming_matches) && p.upcoming_matches.length ? p.upcoming_matches[0] : null;
+                const th = roleTheme(p.role_category), ringV = st.avg === null ? 0 : Math.min(100, st.avg * 10);
                 const badge = st.myCount > 0
-                    ? `<span class="text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded"><i class="fa-solid fa-check mr-1"></i>Valutato (${st.myCount}x)</span>`
-                    : `<span class="text-[11px] font-medium bg-canvas text-muted border border-line px-2 py-0.5 rounded">Da osservare</span>`;
-                return `<div class="bg-white rounded-lg p-5 border border-line hover:border-ink/30 transition flex flex-col justify-between gap-3.5">
+                    ? `<span class="chip chip-ok"><i class="fa-solid fa-check"></i>Valutato (${st.myCount}x)</span>`
+                    : `<span class="chip chip-todo">Da osservare</span>`;
+                return `<div class="glass pcard rounded-2xl p-5 flex flex-col justify-between gap-4" style="--rc:${th.b};--rc-soft:${th.soft};--rc-ink:${th.ink}">
                     <div>
-                        <div class="flex items-start gap-3 mb-2.5">
-                            <img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" class="w-12 h-12 rounded-md object-cover border border-line flex-shrink-0">
+                        <div class="flex items-start gap-3.5">
+                            <img src="${esc(playerPhoto(p))}" alt="" class="ava flex-shrink-0">
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-1 mb-1">${badge}<span class="text-[10px] font-mono font-bold text-muted">${esc(p.public_code || '')}</span></div>
-                                <h3 class="font-semibold text-base text-ink truncate">${esc(p.name)} ${p.is_vivaio ? '<span class="text-[10px] bg-amber-50 text-amber-800 px-1.5 py-0.5 rounded ml-1">Vivaio</span>' : ''}</h3>
-                                <p class="text-xs text-muted truncate">${esc(p.role_category)} • ${p.dob ? p.dob.slice(0,4) : '-'} • ${esc(p.club || 'Svincolato')}</p>
+                                <div class="flex items-center gap-1.5 flex-wrap mb-1"><span class="chip chip-role">${esc(p.role_category)}</span>${p.is_vivaio ? '<span class="chip chip-viv">Vivaio</span>' : ''}</div>
+                                <h3 class="font-semibold text-[17px] leading-tight text-ink truncate">${esc(p.name)}</h3>
+                                <p class="text-xs text-muted truncate">${p.dob ? p.dob.slice(0,4) : '-'} • ${esc(p.club || 'Svincolato')}</p>
                             </div>
+                            <div class="flex flex-col items-center flex-shrink-0"><div class="ring" style="--v:${ringV}" title="Media T.I.P.S."><b>${st.avg ?? '—'}</b></div><div class="ring-cap">T.I.P.S.</div></div>
                         </div>
-                        ${nextMatch ? `<div class="p-2 rounded bg-accent-soft/60 border border-blue-200 text-[11px] text-ink"><i class="fa-solid fa-calendar text-accent mr-1"></i>${formatDateIT(nextMatch.date)} vs <strong>${esc(nextMatch.opponent)}</strong> (${esc(nextMatch.location)})</div>` : ''}
+                        <div class="flex items-center justify-between mt-3.5">${badge}<span class="code">${esc(p.public_code || '')}</span></div>
+                        ${nextMatch ? `<div class="next-match mt-2.5 text-ink"><i class="fa-solid fa-calendar text-accent mr-1"></i>${formatDateIT(nextMatch.date)} vs <strong>${esc(nextMatch.opponent)}</strong> (${esc(nextMatch.location)})</div>` : ''}
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="openEvaluateModal(${jsq(p.id)})" class="flex-1 min-h-[40px] rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Valuta T.I.P.S.</button>
-                        <button onclick="openDetailModal(${jsq(p.id)})" class="min-h-[40px] px-3.5 rounded-md bg-canvas border border-line text-ink text-xs font-semibold">Dossier (${st.count})</button>
+                        <button onclick="openEvaluateModal(${jsq(p.id)})" class="flex-1 min-h-[42px] rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold">Valuta T.I.P.S.</button>
+                        <button onclick="openDetailModal(${jsq(p.id)})" class="min-h-[42px] px-4 rounded-xl bg-white/70 border border-line text-ink text-xs font-semibold">Dossier (${st.count})</button>
                     </div>
                 </div>`;
             }).join('');
@@ -862,7 +932,7 @@
 
         function renderScoutClubs() {
             const box = document.getElementById('scout-clubs-list');
-            if (!dbClubs.length) return box.innerHTML = '<div class="col-span-full bg-white p-6 rounded-lg border border-line text-sm text-muted text-center">Nessuna società registrata al momento.</div>';
+            if (!dbClubs.length) return box.innerHTML = '<div class="col-span-full glass p-6 rounded-2xl text-sm text-muted text-center">Nessuna società registrata al momento.</div>';
             box.innerHTML = dbClubs.map(c => {
                 const aff = dbAffiliations.find(a => a.scout_id === currentUser.id && a.club_id === c.id);
                 let badge = `<span class="text-[11px] bg-canvas text-muted px-2 py-0.5 rounded border border-line">Freelance</span>`;
@@ -870,7 +940,7 @@
                 if (aff?.status === 'pending') { badge = `<span class="text-[11px] bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200">In attesa</span>`; actionHtml = `<button disabled class="w-full min-h-[38px] rounded-md bg-canvas text-muted text-xs font-semibold">Richiesta Inviata</button>`; }
                 else if (aff?.status === 'approved') { badge = `<span class="text-[11px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Affiliato</span>`; actionHtml = `<button onclick="leaveClubAffiliation(${jsq(aff.id)})" class="w-full min-h-[38px] rounded-md bg-white border border-line text-crimson text-xs font-semibold">Rimuovi</button>`; }
                 else if (aff?.status === 'rejected') { badge = `<span class="text-[11px] bg-crimson-soft text-crimson px-2 py-0.5 rounded">Rifiutata</span>`; actionHtml = `<button disabled class="w-full min-h-[38px] rounded-md bg-canvas text-muted text-xs font-semibold">Non autorizzato</button>`; }
-                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3">
+                return `<div class="glass rounded-2xl p-5 border border-line flex flex-col justify-between gap-3">
                     <div>
                         <div class="flex items-center justify-between mb-2">${badge}<span class="text-[10px] font-mono text-muted">${esc(c.public_code || '')}</span></div>
                         <div class="flex items-center gap-3 mt-1">${c.avatar_url ? `<img src="${esc(c.avatar_url)}" class="w-10 h-10 rounded object-contain border border-line p-0.5 bg-white">` : ''}<div><h3 class="font-semibold text-base text-ink">${esc(c.organization || c.full_name)}</h3><p class="text-xs text-muted">${esc(c.city || '-')}</p></div></div>
@@ -937,8 +1007,8 @@
         function renderScoutRequests() {
             const box = document.getElementById('scout-requests-list');
             const visibleReqs = dbRequests.filter(r => r.request_type !== 'vivaio' || dbAffiliations.some(a => a.scout_id === currentUser.id && a.club_id === r.club_id && a.status === 'approved'));
-            if (!visibleReqs.length) return box.innerHTML = '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessuna richiesta attiva.</div>';
-            box.innerHTML = visibleReqs.map(r => `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between mb-2"><span class="text-[11px] font-semibold px-2 py-0.5 rounded ${r.request_type === 'vivaio' ? 'bg-amber-50 text-amber-800' : 'bg-accent-soft text-accent'}">${r.request_type === 'vivaio' ? 'Talento Vivaio' : 'Esigenza Club'}</span><span class="text-xs text-muted">${esc(r.club_name)}</span></div><h3 class="font-semibold text-base text-ink">${esc(r.title)}</h3><p class="text-xs text-ink bg-canvas p-3 rounded-md border border-line mt-2">${esc(r.notes || '-')}</p></div>${r.player_id ? `<button onclick="openEvaluateModal(${jsq(r.player_id)})" class="w-full min-h-[40px] rounded-md bg-accent text-white text-xs font-semibold">Valuta questo Talento</button>` : ''}</div>`).join('');
+            if (!visibleReqs.length) return box.innerHTML = '<div class="col-span-full glass p-8 rounded-2xl text-center text-sm text-muted">Nessuna richiesta attiva.</div>';
+            box.innerHTML = visibleReqs.map(r => `<div class="glass rounded-2xl p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between mb-2"><span class="text-[11px] font-semibold px-2 py-0.5 rounded ${r.request_type === 'vivaio' ? 'bg-amber-50 text-amber-800' : 'bg-accent-soft text-accent'}">${r.request_type === 'vivaio' ? 'Talento Vivaio' : 'Esigenza Club'}</span><span class="text-xs text-muted">${esc(r.club_name)}</span></div><h3 class="font-semibold text-base text-ink">${esc(r.title)}</h3><p class="text-xs text-ink bg-canvas p-3 rounded-md border border-line mt-2">${esc(r.notes || '-')}</p></div>${r.player_id ? `<button onclick="openEvaluateModal(${jsq(r.player_id)})" class="w-full min-h-[40px] rounded-md bg-accent text-white text-xs font-semibold">Valuta questo Talento</button>` : ''}</div>`).join('');
         }
 
         async function saveOwnProfile(role) {
@@ -958,7 +1028,7 @@
             const years = [...new Set(dbPlayers.map(p => p.dob ? p.dob.slice(0,4) : null).filter(Boolean))].sort((a,b) => b - a);
             document.getElementById('club-f-year').innerHTML = '<option value="ALL">Annata: Tutte</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
             document.getElementById('cp-code-badge').textContent = `ID CLUB: ${currentUser.public_code || '-'}`;
-            document.getElementById('cp-avatar-preview').src = currentUser.avatar_url || 'https://placehold.co/160x160/E5E5EA/6E6E73?text=LOGO';
+            document.getElementById('cp-avatar-preview').src = currentUser.avatar_url || labelAvatarUri('LOGO');
             document.getElementById('cp-org').value = currentUser.organization || '';
             document.getElementById('cp-fullname').value = currentUser.full_name || '';
             document.getElementById('cp-phone').value = currentUser.phone || '';
@@ -970,7 +1040,7 @@
         function setClubTab(tab) {
             ['showcase', 'vivaio', 'requests', 'profile'].forEach(t => {
                 document.getElementById(`club-panel-${t}`).classList.toggle('hidden', t !== tab);
-                document.getElementById(`ctab-${t}`).className = t === tab ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white flex items-center justify-center gap-1.5' : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted flex items-center justify-center gap-1.5';
+                document.getElementById(`ctab-${t}`).className = t === tab ? 'min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on flex items-center justify-center gap-1.5' : 'min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off flex items-center justify-center gap-1.5';
             });
         }
 
@@ -1006,8 +1076,25 @@
             });
             document.getElementById('club-showcase-grid').innerHTML = list.length ? list.map(p => {
                 const st = getPlayerStats(p.id);
-                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-4"><div><div class="flex items-start gap-3 mb-2"><img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" class="w-12 h-12 rounded-md object-cover border border-line flex-shrink-0"><div class="min-w-0 flex-1"><div class="flex justify-between"><span class="text-[11px] font-semibold bg-canvas px-2 py-0.5 rounded border border-line">${esc(p.role_category)}</span><span class="text-[10px] font-mono text-muted">${esc(p.public_code || '')}</span></div><h3 class="font-semibold text-base text-ink truncate mt-1">${esc(p.name)}</h3><p class="text-xs text-muted truncate">${esc(p.club || '-')} • ${p.dob ? p.dob.slice(0,4) : '-'}</p></div></div><div class="mt-2 p-2.5 bg-canvas rounded-md border border-line flex justify-between text-xs"><span><i class="fa-solid fa-star text-amber-500 mr-1"></i><strong>${st.avg.toFixed(1)}</strong> T.I.P.S.</span><span class="text-muted">${st.count} oss.</span></div></div><button onclick="openDetailModal(${jsq(p.id)})" class="w-full min-h-[40px] rounded-md bg-ink text-white text-xs font-semibold">Apri Dossier & PDF</button></div>`;
-            }).join('') : '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessun calciatore in vetrina.</div>';
+                const th = roleTheme(p.role_category), ringV = st.avg === null ? 0 : Math.min(100, st.avg * 10);
+                return `<div class="glass pcard rounded-2xl p-5 flex flex-col justify-between gap-4" style="--rc:${th.b};--rc-soft:${th.soft};--rc-ink:${th.ink}">
+                    <div>
+                        <div class="flex items-start gap-3.5">
+                            <img src="${esc(playerPhoto(p))}" alt="" class="ava flex-shrink-0">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-2 mb-1"><span class="chip chip-role">${esc(p.role_category)}</span><span class="code">${esc(p.public_code || '')}</span></div>
+                                <h3 class="font-semibold text-[17px] leading-tight text-ink truncate">${esc(p.name)}</h3>
+                                <p class="text-xs text-muted truncate">${esc(p.club || '-')} • ${p.dob ? p.dob.slice(0,4) : '-'}</p>
+                            </div>
+                        </div>
+                        <div class="next-match mt-3.5 flex items-center gap-3">
+                            <div class="ring" style="--v:${ringV}"><b>${st.avg === null ? '—' : st.avg.toFixed(1)}</b></div>
+                            <div class="text-xs"><div class="font-semibold text-ink">Media T.I.P.S.</div><div class="text-muted">${st.count} osservazioni</div></div>
+                        </div>
+                    </div>
+                    <button onclick="openDetailModal(${jsq(p.id)})" class="w-full min-h-[42px] rounded-xl bg-ink text-white text-xs font-semibold">Apri Dossier &amp; PDF</button>
+                </div>`;
+            }).join('') : '<div class="col-span-full glass p-8 rounded-2xl text-center text-sm text-muted">Nessun calciatore in vetrina.</div>';
         }
 
         async function addVivaioPlayer() {
@@ -1022,8 +1109,8 @@
             const mine = dbPlayers.filter(p => p.is_vivaio && p.club_owner_id === currentUser.id);
             document.getElementById('club-vivaio-grid').innerHTML = mine.length ? mine.map(p => {
                 const st = getPlayerStats(p.id), reqSent = dbRequests.some(r => r.player_id === p.id);
-                return `<div class="bg-white rounded-lg p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between"><span class="text-[11px] font-semibold bg-amber-50 text-amber-800 px-2 py-0.5 rounded">Vivaio</span><span class="text-[10px] font-mono text-muted">${esc(p.public_code || '')}</span></div><h3 class="font-semibold text-base mt-2">${esc(p.name)}</h3><p class="text-xs text-muted">${esc(p.role_category)} • ${p.dob ? p.dob.slice(0,4) : '-'}</p><div class="mt-3 p-2 bg-canvas rounded border border-line text-xs">Media: <strong>${st.avg ?? 'In attesa'}</strong> (${st.count} oss.)</div></div><div class="flex gap-2"><button onclick="openDetailModal(${jsq(p.id)})" class="flex-1 min-h-[38px] rounded-md bg-canvas border border-line text-xs font-semibold">Voti / PDF</button><button onclick="requestScoutForVivaio(${jsq(p.id)})" class="flex-1 min-h-[38px] rounded-md ${reqSent ? 'bg-emerald-700' : 'bg-accent'} text-white text-xs font-semibold">${reqSent ? 'Inviata' : 'Chiedi a Scout'}</button></div></div>`;
-            }).join('') : '<div class="col-span-full bg-white p-8 rounded-lg border border-line text-center text-sm text-muted">Nessun talento nel Vivaio.</div>';
+                return `<div class="glass rounded-2xl p-5 border border-line flex flex-col justify-between gap-3"><div><div class="flex justify-between"><span class="text-[11px] font-semibold bg-amber-50 text-amber-800 px-2 py-0.5 rounded">Vivaio</span><span class="text-[10px] font-mono text-muted">${esc(p.public_code || '')}</span></div><h3 class="font-semibold text-base mt-2">${esc(p.name)}</h3><p class="text-xs text-muted">${esc(p.role_category)} • ${p.dob ? p.dob.slice(0,4) : '-'}</p><div class="mt-3 p-2 bg-canvas rounded border border-line text-xs">Media: <strong>${st.avg ?? 'In attesa'}</strong> (${st.count} oss.)</div></div><div class="flex gap-2"><button onclick="openDetailModal(${jsq(p.id)})" class="flex-1 min-h-[38px] rounded-md bg-canvas border border-line text-xs font-semibold">Voti / PDF</button><button onclick="requestScoutForVivaio(${jsq(p.id)})" class="flex-1 min-h-[38px] rounded-md ${reqSent ? 'bg-emerald-700' : 'bg-accent'} text-white text-xs font-semibold">${reqSent ? 'Inviata' : 'Chiedi a Scout'}</button></div></div>`;
+            }).join('') : '<div class="col-span-full glass p-8 rounded-2xl text-center text-sm text-muted">Nessun talento nel Vivaio.</div>';
         }
 
         async function requestScoutForVivaio(pid) {
@@ -1044,7 +1131,7 @@
 
         function renderClubMyRequests() {
             const mine = dbRequests.filter(r => r.club_id === currentUser.id);
-            document.getElementById('club-my-requests').innerHTML = mine.map(r => `<div class="bg-white p-4 rounded-lg border border-line flex justify-between text-sm"><div><strong>${esc(r.title)}</strong><div class="text-xs text-muted">${esc(r.notes)}</div></div><span class="text-xs font-semibold text-emerald-700">${r.request_type}</span></div>`).join('');
+            document.getElementById('club-my-requests').innerHTML = mine.map(r => `<div class="glass p-4 rounded-2xl flex justify-between text-sm"><div><strong>${esc(r.title)}</strong><div class="text-xs text-muted">${esc(r.notes)}</div></div><span class="text-xs font-semibold text-emerald-700">${r.request_type}</span></div>`).join('');
         }
 
         // ===================================================================
@@ -1059,7 +1146,7 @@
 
         function setAdminTab(tab) {
             adminTab = tab;
-            ['players', 'scouts', 'clubs', 'affiliations'].forEach(t => document.getElementById(`admtab-${t}`).className = t === tab ? 'min-h-[42px] rounded-md text-xs sm:text-sm font-semibold bg-ink text-white' : 'min-h-[42px] rounded-md text-xs sm:text-sm font-medium text-muted');
+            ['players', 'scouts', 'clubs', 'affiliations'].forEach(t => document.getElementById(`admtab-${t}`).className = t === tab ? 'min-h-[42px] rounded-xl text-xs sm:text-sm font-semibold tab-on' : 'min-h-[42px] rounded-xl text-xs sm:text-sm font-medium tab-off');
             const box = document.getElementById('admin-content-container');
 
             if (tab === 'players') {
@@ -1110,7 +1197,7 @@
                 document.getElementById('admin-edit-title').textContent = `Modifica Atleta (${p.public_code || ''})`;
                 f.innerHTML = `
                     <div class="flex items-center gap-4 p-3 bg-canvas rounded-md border border-line">
-                        <img id="ae-photo-preview" src="${esc(p.photo || PLACEHOLDER_PHOTO)}" class="w-16 h-16 rounded-md object-cover border border-line bg-white">
+                        <img id="ae-photo-preview" src="${esc(playerPhoto(p))}" class="w-16 h-16 rounded-md object-cover border border-line bg-white">
                         <label class="px-3 py-1.5 rounded-md bg-white border border-line text-xs font-semibold cursor-pointer"><i class="fa-solid fa-camera text-accent mr-1"></i>Cambia Foto<input type="file" accept="image/*" onchange="handleUploadImage(event,'admin')" class="hidden"></label>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1202,13 +1289,14 @@
             currentDetailPlayerId = pid;
             const p = dbPlayers.find(x => x.id === pid); if (!p) return;
             const st = getPlayerStats(pid);
-            document.getElementById('dm-photo').src = p.photo || PLACEHOLDER_PHOTO;
+            document.getElementById('dm-photo').src = playerPhoto(p);
             document.getElementById('dm-name').textContent = p.name;
             document.getElementById('dm-code').textContent = p.public_code || '';
             document.getElementById('dm-meta').textContent = `${p.role_category} • ${p.club || '-'} • Anno ${p.dob ? p.dob.slice(0,4) : '-'} • ${p.residence || '-'}`;
 
             const barsHtml = Object.entries(st.keyAvgs).map(([k, v]) => `<div class="bg-white p-2 rounded border border-line text-center"><div class="text-[10px] text-muted font-semibold">${esc(k)}</div><div class="text-sm font-bold text-ink">${v.toFixed(1)}</div></div>`).join('');
-            document.getElementById('dm-stats-bar').innerHTML = `<div class="flex flex-wrap items-center justify-between gap-3"><div><div class="text-xs text-muted">Media T.I.P.S. Aggregata</div><div class="text-2xl font-bold text-ink">${st.avg ?? '—'} <span class="text-xs font-normal text-muted">(${st.count} osservazioni)</span></div></div><div class="text-xs text-muted">Piede: <strong class="text-ink">${esc(p.foot)}</strong> • ${esc(p.height||'-')}cm / ${esc(p.weight||'-')}kg</div></div>${barsHtml ? `<div class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-2 border-t border-line">${barsHtml}</div>` : ''}`;
+            const thD = roleTheme(p.role_category), radar = radarSvg(st.keyAvgs, thD.b);
+            document.getElementById('dm-stats-bar').innerHTML = `<div class="flex flex-col sm:flex-row items-center gap-5">${radar ? `<div class="flex-shrink-0">${radar}</div>` : ''}<div class="flex-1 w-full space-y-3"><div class="flex flex-wrap items-center justify-between gap-3"><div><div class="text-xs text-muted">Media T.I.P.S. Aggregata</div><div class="text-2xl font-bold text-ink">${st.avg ?? '—'} <span class="text-xs font-normal text-muted">(${st.count} osservazioni)</span></div></div><div class="text-xs text-muted">Piede: <strong class="text-ink">${esc(p.foot)}</strong> • ${esc(p.height||'-')}cm / ${esc(p.weight||'-')}kg</div></div>${barsHtml ? `<div class="grid grid-cols-3 gap-2 pt-3 border-t border-line">${barsHtml}</div>` : ''}</div></div>`;
 
             const mBox = document.getElementById('dm-matches-box'), matches = Array.isArray(p.upcoming_matches) ? p.upcoming_matches : [];
             if (matches.length) { mBox.classList.remove('hidden'); mBox.innerHTML = `<div class="text-xs font-semibold text-accent">Prossime Partite in Programma</div>` + matches.map(m => `<div class="text-xs text-ink">${formatDateIT(m.date)} (${esc(m.time||'-')}) — vs <strong>${esc(m.opponent)}</strong> • ${esc(m.location)}</div>`).join(''); }
@@ -1227,11 +1315,11 @@
             const clubLogo = (currentUser?.role === 'club' && currentUser?.avatar_url) ? `<img src="${esc(currentUser.avatar_url)}" style="height:44px;width:44px;object-fit:contain;border-radius:6px;border:1px solid #E5E5EA;padding:2px;">` : '';
             const verdictStr = Object.entries(st.verdicts).map(([k, v]) => `${v} ${k}`).join(' • ') || 'Nessun esito';
 
-            const barsPdf = Object.entries(st.keyAvgs).length === 0 ? '<div style="font-size:10px;color:#6E6E73;">Nessun punteggio disponibile.</div>' : Object.entries(st.keyAvgs).map(([k, v]) => `<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;"><span style="font-weight:600;color:#1D1D1F;">${esc(k)} — ${esc(TIPS_FULL_LABELS[k] || k)}</span><span style="font-weight:700;color:#0071E3;">${v.toFixed(1)} / 10</span></div><div style="width:100%;height:6px;background:#E5E5EA;border-radius:3px;overflow:hidden;"><div style="width:${Math.min(100, v * 10)}%;height:100%;background:#0071E3;"></div></div></div>`).join('');
+            const barsPdf = Object.entries(st.keyAvgs).length === 0 ? '<div style="font-size:10px;color:#6E6E73;">Nessun punteggio disponibile.</div>' : Object.entries(st.keyAvgs).map(([k, v]) => `<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;"><span style="font-weight:600;color:#1D1D1F;">${esc(k)} — ${esc(TIPS_FULL_LABELS[k] || k)}</span><span style="font-weight:700;color:#0B8A5C;">${v.toFixed(1)} / 10</span></div><div style="width:100%;height:6px;background:#E5E5EA;border-radius:3px;overflow:hidden;"><div style="width:${Math.min(100, v * 10)}%;height:100%;background:#0B8A5C;"></div></div></div>`).join('');
 
-            const obsPdf = st.list.length === 0 ? '<div style="padding:12px;text-align:center;color:#6E6E73;font-size:10px;border:1px solid #E5E5EA;border-radius:6px;">Nessuna osservazione registrata.</div>' : st.list.map(r => `<div class="avoid-break" style="border:1px solid #E5E5EA;border-radius:6px;padding:10px 12px;margin-bottom:10px;background:#FAFAFC;"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E5E5EA;padding-bottom:6px;margin-bottom:6px;"><div><div style="font-size:10.5px;font-weight:700;color:#1D1D1F;">${esc(r.observer_name)} <span style="font-weight:400;color:#6E6E73;">(${esc(r.observer_role || 'Scout')})</span></div><div style="font-size:9px;color:#6E6E73;margin-top:2px;">Data: <strong>${formatDateIT(r.obs_date)}</strong> • Luogo: ${esc(r.location)} • Contesto: ${esc(r.context)} • Atteggiamento: ${esc(r.attitude)}</div></div><div style="text-align:right;"><span style="background:#1D1D1F;color:#FFF;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;">Media ${Number(r.avg).toFixed(1)}</span><div style="font-size:8.5px;font-weight:700;color:#0071E3;margin-top:3px;">${esc(r.outcome)}</div></div></div><div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:5px;">${Object.entries(r.scores || {}).map(([k, v]) => `<span style="background:#FFF;border:1px solid #D2D2D7;border-radius:4px;padding:2px 6px;font-size:8.5px;"><strong>${esc(k)}:</strong> ${Number(v).toFixed(1)}</span>`).join('')}</div><p style="margin:0;font-size:9.5px;line-height:1.5;color:#1D1D1F;">${esc(r.notes)}</p></div>`).join('');
+            const obsPdf = st.list.length === 0 ? '<div style="padding:12px;text-align:center;color:#6E6E73;font-size:10px;border:1px solid #E5E5EA;border-radius:6px;">Nessuna osservazione registrata.</div>' : st.list.map(r => `<div class="avoid-break" style="border:1px solid #E5E5EA;border-radius:6px;padding:10px 12px;margin-bottom:10px;background:#FAFAFC;"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E5E5EA;padding-bottom:6px;margin-bottom:6px;"><div><div style="font-size:10.5px;font-weight:700;color:#1D1D1F;">${esc(r.observer_name)} <span style="font-weight:400;color:#6E6E73;">(${esc(r.observer_role || 'Scout')})</span></div><div style="font-size:9px;color:#6E6E73;margin-top:2px;">Data: <strong>${formatDateIT(r.obs_date)}</strong> • Luogo: ${esc(r.location)} • Contesto: ${esc(r.context)} • Atteggiamento: ${esc(r.attitude)}</div></div><div style="text-align:right;"><span style="background:#1D1D1F;color:#FFF;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;">Media ${Number(r.avg).toFixed(1)}</span><div style="font-size:8.5px;font-weight:700;color:#0B8A5C;margin-top:3px;">${esc(r.outcome)}</div></div></div><div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:5px;">${Object.entries(r.scores || {}).map(([k, v]) => `<span style="background:#FFF;border:1px solid #D2D2D7;border-radius:4px;padding:2px 6px;font-size:8.5px;"><strong>${esc(k)}:</strong> ${Number(v).toFixed(1)}</span>`).join('')}</div><p style="margin:0;font-size:9.5px;line-height:1.5;color:#1D1D1F;">${esc(r.notes)}</p></div>`).join('');
 
-            document.getElementById('print-area').innerHTML = `<div class="pdf-doc"><div><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1D1D1F;padding-bottom:10px;margin-bottom:16px;"><div><div style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:#0071E3;text-transform:uppercase;">SCOUTING DEPARTMENT • OFFICIAL PLAYER REPORT • ${esc(p.public_code || '')}</div><div style="font-size:10px;color:#6E6E73;margin-top:2px;">Report generato il ${new Date().toLocaleDateString('it-IT')} ${currentUser?.organization ? '• ' + esc(currentUser.organization) : ''}</div></div>${clubLogo}</div><div style="display:flex;gap:14px;align-items:center;background:#F5F5F7;border:1px solid #E5E5EA;border-radius:8px;padding:12px;margin-bottom:16px;"><img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" style="width:78px;height:78px;border-radius:6px;object-fit:cover;border:1px solid #D2D2D7;background:#FFF;"><div style="flex:1;"><div style="font-size:20px;font-weight:700;color:#1D1D1F;line-height:1.15;">${esc(p.name)}</div><div style="font-size:11px;font-weight:600;color:#0071E3;margin-top:2px;">${esc(p.role_category)} • ${esc(p.club || 'Svincolato')} ${p.league ? '(' + esc(p.league) + ')' : ''}</div><div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;margin-top:8px;font-size:9.5px;color:#1D1D1F;"><div><span style="color:#6E6E73;">Nascita:</span> <strong>${formatDateIT(p.dob)}</strong> ${age ? `(${age} anni)` : ''}</div><div><span style="color:#6E6E73;">Fisico:</span> <strong>${esc(p.height || '-')} cm / ${esc(p.weight || '-')} kg</strong></div><div><span style="color:#6E6E73;">Piede:</span> <strong>${esc(p.foot)}</strong></div><div style="grid-column:span 2;"><span style="color:#6E6E73;">Residenza:</span> <strong>${esc(p.residence || '-')}</strong></div><div><span style="color:#6E6E73;">ID Atleta:</span> <strong>${esc(p.public_code || '-')}</strong></div></div></div></div><div class="avoid-break" style="display:grid;grid-template-columns:1fr 1.6fr;gap:14px;margin-bottom:18px;"><div style="background:#1D1D1F;color:#FFF;border-radius:8px;padding:14px;display:flex;flex-direction:column;justify-content:center;text-align:center;"><div style="font-size:9px;font-weight:600;letter-spacing:1px;color:#A1A1A6;text-transform:uppercase;">MEDIA GLOBALE T.I.P.S.</div><div style="font-size:36px;font-weight:700;color:#FFF;line-height:1.1;margin:6px 0;">${st.avg !== null ? st.avg.toFixed(1) : '—'}</div><div style="font-size:10px;color:#D2D2D7;">Basata su <strong>${st.count}</strong> ${st.count === 1 ? 'osservazione' : 'osservazioni'}</div><div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.15);font-size:9px;color:${st.discordant ? '#FBBF24' : '#34D399'};font-weight:600;">${st.discordant ? `Pareri discordanti (scarto ${st.spread} pt)` : (st.count >= 2 ? `Alto Consenso (scarto ${st.spread} pt)` : 'Valutazione singola')}</div><div style="font-size:8.5px;color:#A1A1A6;margin-top:4px;">${esc(verdictStr)}</div></div><div style="border:1px solid #E5E5EA;border-radius:8px;padding:12px;"><div style="font-size:10px;font-weight:700;color:#1D1D1F;text-transform:uppercase;margin-bottom:10px;">Medie per Parametro T.I.P.S.</div>${barsPdf}</div></div><div style="font-size:11px;font-weight:700;color:#1D1D1F;text-transform:uppercase;border-bottom:1px solid #E5E5EA;padding-bottom:5px;margin-bottom:10px;">Storico Cronologico Osservazioni (${st.count})</div>${obsPdf}</div><div style="border-top:1px solid #E5E5EA;padding-top:8px;margin-top:20px;display:flex;justify-content:space-between;font-size:8.5px;color:#6E6E73;"><span>Scouting Department — Documento Riservato ad uso interno</span><span>${esc(p.name)} (${esc(p.public_code||'')}) • ${new Date().toLocaleDateString('it-IT')}</span></div></div>`;
+            document.getElementById('print-area').innerHTML = `<div class="pdf-doc"><div><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1D1D1F;padding-bottom:10px;margin-bottom:16px;"><div><div style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:#0B8A5C;text-transform:uppercase;">SCOUTING DEPARTMENT • OFFICIAL PLAYER REPORT • ${esc(p.public_code || '')}</div><div style="font-size:10px;color:#6E6E73;margin-top:2px;">Report generato il ${new Date().toLocaleDateString('it-IT')} ${currentUser?.organization ? '• ' + esc(currentUser.organization) : ''}</div></div>${clubLogo}</div><div style="display:flex;gap:14px;align-items:center;background:#F5F5F7;border:1px solid #E5E5EA;border-radius:8px;padding:12px;margin-bottom:16px;"><img src="${esc(p.photo || PLACEHOLDER_PHOTO)}" style="width:78px;height:78px;border-radius:6px;object-fit:cover;border:1px solid #D2D2D7;background:#FFF;"><div style="flex:1;"><div style="font-size:20px;font-weight:700;color:#1D1D1F;line-height:1.15;">${esc(p.name)}</div><div style="font-size:11px;font-weight:600;color:#0B8A5C;margin-top:2px;">${esc(p.role_category)} • ${esc(p.club || 'Svincolato')} ${p.league ? '(' + esc(p.league) + ')' : ''}</div><div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;margin-top:8px;font-size:9.5px;color:#1D1D1F;"><div><span style="color:#6E6E73;">Nascita:</span> <strong>${formatDateIT(p.dob)}</strong> ${age ? `(${age} anni)` : ''}</div><div><span style="color:#6E6E73;">Fisico:</span> <strong>${esc(p.height || '-')} cm / ${esc(p.weight || '-')} kg</strong></div><div><span style="color:#6E6E73;">Piede:</span> <strong>${esc(p.foot)}</strong></div><div style="grid-column:span 2;"><span style="color:#6E6E73;">Residenza:</span> <strong>${esc(p.residence || '-')}</strong></div><div><span style="color:#6E6E73;">ID Atleta:</span> <strong>${esc(p.public_code || '-')}</strong></div></div></div></div><div class="avoid-break" style="display:grid;grid-template-columns:1fr 1.6fr;gap:14px;margin-bottom:18px;"><div style="background:#1D1D1F;color:#FFF;border-radius:8px;padding:14px;display:flex;flex-direction:column;justify-content:center;text-align:center;"><div style="font-size:9px;font-weight:600;letter-spacing:1px;color:#A1A1A6;text-transform:uppercase;">MEDIA GLOBALE T.I.P.S.</div><div style="font-size:36px;font-weight:700;color:#FFF;line-height:1.1;margin:6px 0;">${st.avg !== null ? st.avg.toFixed(1) : '—'}</div><div style="font-size:10px;color:#D2D2D7;">Basata su <strong>${st.count}</strong> ${st.count === 1 ? 'osservazione' : 'osservazioni'}</div><div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.15);font-size:9px;color:${st.discordant ? '#FBBF24' : '#34D399'};font-weight:600;">${st.discordant ? `Pareri discordanti (scarto ${st.spread} pt)` : (st.count >= 2 ? `Alto Consenso (scarto ${st.spread} pt)` : 'Valutazione singola')}</div><div style="font-size:8.5px;color:#A1A1A6;margin-top:4px;">${esc(verdictStr)}</div></div><div style="border:1px solid #E5E5EA;border-radius:8px;padding:12px;"><div style="font-size:10px;font-weight:700;color:#1D1D1F;text-transform:uppercase;margin-bottom:10px;">Medie per Parametro T.I.P.S.</div>${barsPdf}</div></div><div style="font-size:11px;font-weight:700;color:#1D1D1F;text-transform:uppercase;border-bottom:1px solid #E5E5EA;padding-bottom:5px;margin-bottom:10px;">Storico Cronologico Osservazioni (${st.count})</div>${obsPdf}</div><div style="border-top:1px solid #E5E5EA;padding-top:8px;margin-top:20px;display:flex;justify-content:space-between;font-size:8.5px;color:#6E6E73;"><span>Scouting Department — Documento Riservato ad uso interno</span><span>${esc(p.name)} (${esc(p.public_code||'')}) • ${new Date().toLocaleDateString('it-IT')}</span></div></div>`;
             window.print();
         }
     </script>
